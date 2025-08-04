@@ -1,0 +1,13 @@
+{
+	"version": 1,
+	"changelists": [
+		{
+			"guid": "00000000000000000000000000000000",
+			"description": "Default Uncontrolled Changelist",
+			"files": [
+				"C:/Users/user/Desktop/portal2_practice/Portal2_practice/Portal2_practice/Content/__ExternalActors__/FirstPerson/Lvl_FirstPerson/1/0X/YYUXCU324Q08HFNWVEIPNQ.uasset",
+				"C:/Users/user/Desktop/portal2_practice/Portal2_practice/Portal2_practice/Content/BP/BP_Portal.uasset"
+			]
+		}
+	]
+}
