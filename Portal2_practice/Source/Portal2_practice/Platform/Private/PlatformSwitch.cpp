@@ -1,6 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
- 
 #include "PlatformSwitch.h"
 #include "CoffeeLibrary.h"
 #include "ULog.h"
@@ -32,13 +31,16 @@ void APlatformSwitch::BeginPlay()
 	JumpDirection = UCoffeeCommonUtil::FindComponentByNameRecursive<UArrowComponent>(this, JUMP_DIRECTION_PATH);
 	SwitchButton = UCoffeeCommonUtil::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
 	SwitchCollision = UCoffeeCommonUtil::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
-	
-	MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
-	MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
-	OriginVector = SwitchButton->GetRelativeLocation();
 
-	SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &APlatformSwitch::OnBeginOverlap);
-	SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &APlatformSwitch::OnEndOverlap);
+	if( SwitchButton != nullptr)
+	{
+		MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
+		MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
+		OriginVector = SwitchButton->GetRelativeLocation();
+
+		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &APlatformSwitch::OnBeginOverlap);
+		SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &APlatformSwitch::OnEndOverlap);
+	}
 }
 
 void APlatformSwitch::Tick(float DeltaTime)
