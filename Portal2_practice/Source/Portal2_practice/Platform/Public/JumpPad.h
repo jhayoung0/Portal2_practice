@@ -4,17 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PlatformSwitch.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeSwitchState, bool, bIsActive);
+#include "JumpPad.generated.h"
 
 UCLASS()
-class PORTAL2_PRACTICE_API APlatformSwitch : public AActor
+class PORTAL2_PRACTICE_API AJumpPad : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	APlatformSwitch();
+	AJumpPad();
 
 protected:
 	virtual void BeginPlay() override;
@@ -27,7 +25,7 @@ private:
 	float LerpAlpha() const;
 	bool ActivateTrigger();
 	FLinearColor GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const;
-	
+
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 						UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
@@ -37,7 +35,11 @@ private:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 					  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-
+#pragma region JUMP
+	void JumpCharacter(AActor* TargetActor) const;
+	void JumpPhysics(const AActor* TargetActor) const;
+#pragma endregion
+	
 public:
 	float ElapsedTime = 0.0f;
 
@@ -74,14 +76,11 @@ public:
 	UPROPERTY()
 	class AActor* InOtherActor;
 
-#pragma region SwitchEvent
-	UFUNCTION(BlueprintCallable, Category="SwitchEvent")
-	void ChangeActivateState(bool State);
+#pragma region JUMP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="JUMP")
+	class UArrowComponent* JumpDirection;
 	
-	UPROPERTY(BlueprintAssignable, Category="SwitchEvent")
-	FChangeSwitchState OnChangeSwitchState;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="SwitchEvent")
-	bool bActivateState = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="JUMP")
+	float JumpPower = 1500.0f;
 #pragma endregion	
 };
