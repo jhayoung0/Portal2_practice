@@ -1,27 +1,34 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
-#include "PlatformSwitch.h"
+#include "JumpPad.h"
 #include "CoffeeLibrary.h"
+#include "ULog.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/ArrowComponent.h"
+#include "GameFramework/Character.h"
 
+#define JUMP_DIRECTION_PATH			TEXT("Arrow_JumpDirection")
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")
 #define SWITCH_COLLISION_PATH		TEXT("Collision")
 
-APlatformSwitch::APlatformSwitch()
+#define PLAYER_TAG					FName("Player")
+
+
+AJumpPad::AJumpPad()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void APlatformSwitch::BeginPlay()
+void AJumpPad::BeginPlay()
 {
 	Super::BeginPlay();
 
 	this->TriggerDelay = Duration;
 	this->DetectTarget = false;
 	this->ElapsedTime = 0;
-	this->bActivateState = false;
 
+	JumpDirection = UCoffeeCommonUtil::FindComponentByNameRecursive<UArrowComponent>(this, JUMP_DIRECTION_PATH);
 	SwitchButton = UCoffeeCommonUtil::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
 	SwitchCollision = UCoffeeCommonUtil::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
 
@@ -31,12 +38,12 @@ void APlatformSwitch::BeginPlay()
 		MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
 		OriginVector = SwitchButton->GetRelativeLocation();
 
-		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &APlatformSwitch::OnBeginOverlap);
-		SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &APlatformSwitch::OnEndOverlap);
+		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
+		SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &AJumpPad::OnEndOverlap);
 	}
 }
 
-void APlatformSwitch::Tick(float DeltaTime)
+void AJumpPad::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -66,22 +73,28 @@ void APlatformSwitch::Tick(float DeltaTime)
 
 	if( ActivateTrigger() )
 	{
-		// 물건이 TriggerDelay 타임 이상 올라가면 발동
-		ChangeActivateState(true);
+		if ( InOtherActor->Tags.Contains(PLAYER_TAG) )
+		{
+			JumpCharacter(InOtherActor);
+		}
+		else
+		{
+			JumpPhysics(InOtherActor);
+		}
 	}
 }
 
-void APlatformSwitch::AddElapsedTime()
+void AJumpPad::AddElapsedTime()
 {
 	ElapsedTime += GetWorld()->GetDeltaSeconds();
 }
 
-float APlatformSwitch::LerpAlpha() const
+float AJumpPad::LerpAlpha() const
 {
 	return UKismetMathLibrary::FClamp( ElapsedTime / Duration, 0.0f, 1.0f );
 }
 
-bool APlatformSwitch::ActivateTrigger()
+bool AJumpPad::ActivateTrigger()
 {
 	TriggerDelay -= GetWorld()->GetDeltaSeconds();
 
@@ -94,7 +107,7 @@ bool APlatformSwitch::ActivateTrigger()
 	return false;
 }
 
-FLinearColor APlatformSwitch::GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const
+FLinearColor AJumpPad::GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const
 {
 	if ( MaterialInstance == nullptr )
 	{
@@ -105,7 +118,7 @@ FLinearColor APlatformSwitch::GetVectorParameterValue( UMaterialInstanceDynamic*
 	return MaterialInstance->K2_GetVectorParameterValue(ParamName);
 }
 
-void APlatformSwitch::OnBeginOverlap(
+void AJumpPad::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -115,7 +128,7 @@ void APlatformSwitch::OnBeginOverlap(
 	this->ElapsedTime = 0.0;
 }
 
-void APlatformSwitch::OnEndOverlap(
+void AJumpPad::OnEndOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
@@ -126,19 +139,30 @@ void APlatformSwitch::OnEndOverlap(
 
 	MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
 	SwitchButton->SetRelativeLocation(OriginVector);
-
-	// 물건이 떨어지면 올라가면 해제
-	this->ChangeActivateState(false);
 }
 
-#pragma region SwitchEvent
-void APlatformSwitch::ChangeActivateState(bool State)
+#pragma region JUMP
+void AJumpPad::JumpCharacter(AActor* TargetActor) const
 {
-	if (this->bActivateState == State)
-		return;
+	ACharacter* Player = Cast<ACharacter>(TargetActor);
 
-	this->bActivateState = State;
-
-	OnChangeSwitchState.Broadcast(bActivateState);
+	if ( Player != nullptr )
+		Player->LaunchCharacter(JumpDirection->GetForwardVector() * JumpPower, false, false);
 }
-#pragma endregion	
+
+void AJumpPad::JumpPhysics(const AActor* TargetActor) const
+{
+	UStaticMeshComponent* MeshComp = TargetActor->FindComponentByClass<UStaticMeshComponent>();
+	if (MeshComp && MeshComp->IsSimulatingPhysics())
+	{
+		FVector ForceDir = JumpDirection ? JumpDirection->GetForwardVector() : FVector::UpVector;
+		UE_LOG(LogTemp, Warning, TEXT("Impulse Dir: %s"), *ForceDir.ToString());
+		MeshComp->AddImpulse(ForceDir * JumpPower, NAME_None, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No physics or invalid component."));
+	}
+
+}
+#pragma endregion
