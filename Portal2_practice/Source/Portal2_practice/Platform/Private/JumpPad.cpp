@@ -1,8 +1,7 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "JumpPad.h"
-#include "CoffeeLibrary.h"
-#include "ULog.h"
+#include "ComponentHelper.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/ArrowComponent.h"
@@ -28,9 +27,9 @@ void AJumpPad::BeginPlay()
 	this->DetectTarget = false;
 	this->ElapsedTime = 0;
 
-	JumpDirection = UCoffeeCommonUtil::FindComponentByNameRecursive<UArrowComponent>(this, JUMP_DIRECTION_PATH);
-	SwitchButton = UCoffeeCommonUtil::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
-	SwitchCollision = UCoffeeCommonUtil::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
+	JumpDirection = ComponentHelper::FindComponentByNameRecursive<UArrowComponent>(this, JUMP_DIRECTION_PATH);
+	SwitchButton = ComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
+	SwitchCollision = ComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
 
 	if( SwitchButton != nullptr)
 	{
