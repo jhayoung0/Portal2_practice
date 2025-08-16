@@ -75,7 +75,6 @@ public:
 
 	FVector StartPos;         // 시작 좌표
 	FVector EndPos;           // 도착 좌표
-	float   Elapsed = 0.f;    // 경과 시간
 	bool    bIsJumping = false;
 	bool    bPhysicsRestored = false;
 };
