@@ -1,16 +1,21 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "JumpPad.h"
+
 #include "FComponentHelper.h"
 #include "FMaterialHelper.h"
 #include "FMathHelper.h"
 
-#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#include "Misc/OutputDeviceNull.h"
 
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")
 #define SWITCH_COLLISION_PATH		TEXT("Collision")
+
+#define BP_FirstPersonCharacter		TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter.BP_FirstPersonCharacter_C")
 
 AJumpPad::AJumpPad()
 {
@@ -136,7 +141,11 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 	}
 	else if (UStaticMeshComponent* MeshComp = InOtherActor->FindComponentByClass<UStaticMeshComponent>())
 	{
+		FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
+		FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
+		
 		MeshComp->SetSimulatePhysics(true);
+		MeshComp->SetPhysicsLinearVelocity(Velocity);
 	}
 
 	bPhysicsRestored = true;
@@ -196,6 +205,29 @@ void AJumpPad::OnBeginOverlap(
 	}
 	else if (UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
 	{
+		AActor* ParentActor = OtherActor->GetAttachParentActor();
+
+		UClass* BPClass = StaticLoadClass(ACharacter::StaticClass(), nullptr, BP_FirstPersonCharacter );
+		if (ParentActor && BPClass && ParentActor->IsA(BPClass))
+		{
+			ACharacter* FirstPersonCharacter = Cast<ACharacter>(ParentActor);
+			if( FirstPersonCharacter != nullptr )
+			{
+				FName FuncName("CanShoot");
+				if ( FirstPersonCharacter->FindFunction(FuncName) )
+				{
+					FOutputDeviceNull Ar;
+					
+					const FString Command = FString::Printf(TEXT("CanShoot %s"), TEXT("true"));
+					FirstPersonCharacter->CallFunctionByNameWithArguments(*Command, Ar, nullptr, true);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CanShoot function not found on %s"), *FirstPersonCharacter->GetName());
+				}
+			}
+		}
+		
 		OtherActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		
 		if (MeshComp->IsSimulatingPhysics())
