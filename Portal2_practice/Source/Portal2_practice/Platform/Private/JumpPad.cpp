@@ -15,6 +15,7 @@
 AJumpPad::AJumpPad()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
 void AJumpPad::BeginPlay()
@@ -30,11 +31,11 @@ void AJumpPad::BeginPlay()
 	if (SwitchButton != nullptr)
 	{
 		MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
-		MaterialButton->SetVectorParameterValue(ColorParam, IdleColor);
 		OriginVector = SwitchButton->GetRelativeLocation();
-
 		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
-		// SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &AJumpPad::OnEndOverlap);
+
+		MaterialButton->SetVectorParameterValue(ColorParam, WarningColor);
+		SwitchButton->SetRelativeLocation(OriginVector);
 	}
 }
 
@@ -49,7 +50,7 @@ void AJumpPad::Tick(float DeltaTime)
 
 	{
 		const auto Color_A = FMaterialHelper::GetVectorParameterValueSafe(MaterialButton, ColorParam);
-		const auto Color_B = IdleColor;
+		const auto Color_B = WarningColor;
 		const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
 
 		MaterialButton->SetVectorParameterValue(ColorParam, Color_Result);
@@ -57,7 +58,7 @@ void AJumpPad::Tick(float DeltaTime)
 
 	{
 		const auto Vector_A = SwitchButton->GetRelativeLocation();
-		const auto Vector_B = EndVector;
+		const auto Vector_B = OriginVector;
 		const auto Vector_Result = UKismetMathLibrary::VLerp(Vector_A, Vector_B, AlphaValue);
 
 		SwitchButton->SetRelativeLocation(Vector_Result);
@@ -75,7 +76,7 @@ void AJumpPad::Tick(float DeltaTime)
 
 	if (Hit.IsValidBlockingHit())
 	{
-		// 충돌했다 → 점프 강제 종료
+		// 충돌했다
 		InOtherActor->SetActorLocation(PrevPos, false);
 
 		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos);
@@ -83,21 +84,24 @@ void AJumpPad::Tick(float DeltaTime)
 		bIsJumping = false;
 		InOtherActor = nullptr;
 		ElapsedTime = 0.f;
+
+		SetActorTickEnabled(false);
 		return;
 	}
 
 	if (AlphaValue >= 0.85f && !bPhysicsRestored)
 	{
-		// 거의 도착했을 때 → 물리/이동 복구
+		// 거의 다 도착했다.
 		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos);
 	}
 
-	// 끝났으면 상태 초기화
 	if (AlphaValue >= 1.0f)
 	{
 		bIsJumping = false;
 		InOtherActor = nullptr;
-		Elapsed = 0.0f;
+		ElapsedTime = 0.0f;
+
+		SetActorTickEnabled(false);
 	}
  }
 
@@ -165,41 +169,41 @@ void AJumpPad::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (InOtherActor == OtherActor)
+	if (!OtherActor || InOtherActor == OtherActor || bIsJumping || !LandingActor )
 		return;
-	
+
+	this->StartPos = OtherActor->GetActorLocation();
+	this->EndPos   = LandingActor->GetActorLocation();
+
+	// 도착지가 너무 가까우면 무시
+	if (FVector::DistSquared(StartPos, EndPos) < 1.f)
+		return;
+
 	this->InOtherActor = OtherActor;
 	this->ElapsedTime = 0.0;
 	this->bPhysicsRestored = false;
+	this->bIsJumping = true;
 
-	MaterialButton->SetVectorParameterValue(ColorParam, WarningColor);
+	SetActorTickEnabled(true);
+
+	MaterialButton->SetVectorParameterValue(ColorParam, IdleColor);
 	SwitchButton->SetRelativeLocation(EndVector);
 	
 	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
 	{
-		StartPos = Player->GetActorLocation();
-		EndPos = LandingActor->GetActorLocation(); // 미리 배치한 도착 지점
-		bIsJumping = true;
-
 		if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
 			MoveComp->DisableMovement();
-	
-		if (bShowLine)
-			FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
 	}
 	else if (UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
 	{
-		// 물리 큐브 처리
+		OtherActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		
 		if (MeshComp->IsSimulatingPhysics())
-		{
-			StartPos   = MeshComp->GetComponentLocation();
-			EndPos     = LandingActor->GetActorLocation();
-			bIsJumping = true;
-	
-			MeshComp->SetSimulatePhysics(false); // 이동 중 물리 끄기
-	
-			if (bShowLine)
-				FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
-		}
+			MeshComp->SetSimulatePhysics(false);
 	}
+
+	if (bShowLine)
+		FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
+
+	UE_LOG(LogTemp, Warning, TEXT("JumpPad triggered: %s -> %s"), *StartPos.ToString(), *EndPos.ToString());
 }
