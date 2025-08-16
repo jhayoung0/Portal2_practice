@@ -2,6 +2,7 @@
 
 #include "PlatformSwitch.h"
 #include "ComponentHelper.h"
+#include "FMaterialHelper.h"
 #include "Kismet/KismetMathLibrary.h"
 
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")
@@ -48,7 +49,7 @@ void APlatformSwitch::Tick(float DeltaTime)
 	// ULOG(Warning, "LerpAlpha : %f", LerpAlpha() );
 
 	{
-		const auto Color_A = GetVectorParameterValue(MaterialButton, ColorParam);
+		const auto Color_A = FMaterialHelper::GetVectorParameterValueSafe(MaterialButton, ColorParam);
 		const auto Color_B = WarningColor;
 		const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
 		
@@ -91,17 +92,6 @@ bool APlatformSwitch::ActivateTrigger()
 	}
 
 	return false;
-}
-
-FLinearColor APlatformSwitch::GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const
-{
-	if ( MaterialInstance == nullptr )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GetVectorParameterValueSafe: MaterialInstance is null"));
-		return FLinearColor::Black;
-	}
-	
-	return MaterialInstance->K2_GetVectorParameterValue(ParamName);
 }
 
 void APlatformSwitch::OnBeginOverlap(

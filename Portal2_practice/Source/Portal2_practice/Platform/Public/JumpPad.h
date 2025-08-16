@@ -24,7 +24,6 @@ private:
 	void AddElapsedTime();
 	float LerpAlpha() const;
 	bool ActivateTrigger();
-	FLinearColor GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const;
 	
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -32,9 +31,6 @@ private:
 						bool bFromSweep, const FHitResult& SweepResult);	
 public:
 	float ElapsedTime = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Switch")
-	bool DetectTarget = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
 	float Duration = 3.0f;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FMathHelper.h"
 #include "Components/ActorComponent.h"
 #include "UParabolaComponent.generated.h"
 
@@ -77,9 +78,7 @@ struct FParabolaBallisticTrack
 	// 목표점+시간으로 V0 역산 → Direction/Power 세팅
 	static FVector SolveV0ForArc(const FVector& InStart, const FVector& InEnd, float t, float InGravityZ=-980.f)
 	{
-		if (t <= KINDA_SMALL_NUMBER) return FVector::ZeroVector;
-		const FVector g(0,0,InGravityZ);
-		return (InEnd - InStart - 0.5f * g * t * t) / t;
+		return FMathHelper::SolveV0ForProjectile( InStart, InEnd, t, InGravityZ );
 	}
 
 	static void SplitVelocity(const FVector& V0, FVector& OutDir, float& OutPow)
@@ -132,13 +131,7 @@ struct FParabolaGeometricTrack
 		const float t = FMath::Clamp(TimeSec, 0.f, D);
 		const float a = t / D;
 
-		const FVector Base = FMath::Lerp(Start, Target, a);
-		const float bump = 4.f * ApexHeight * a * (1.f - a);
-		FVector P = Base + UpAxis.GetSafeNormal() * bump;
-
-		if (bLockZ)
-			P.Z = LockedZ;
-		return P;
+		return FMathHelper::InterpArcSin(Start, Target, ApexHeight, a);
 	}
 
 	FORCEINLINE FVector EvaluateAtAlpha(const AActor* Owner, float Alpha) const
