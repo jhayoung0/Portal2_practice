@@ -5,7 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/ActorComponent.h"
 
-namespace ComponentHelper
+namespace FComponentHelper
 {
 	template<typename T>
 	static T* FindComponentByName(AActor* Owner, const FName& ComponentName)
