@@ -88,6 +88,21 @@ void AJumpPad::Tick(float DeltaTime)
 			{
 				MoveComp->SetMovementMode(MOVE_Falling); // 점프 상태
 				MoveComp->Velocity = Velocity;
+
+				// 1초 뒤에 Walking 모드로 복구
+				FTimerHandle TimerHandle_ResetMovement;
+				Player->GetWorldTimerManager().SetTimer(
+					TimerHandle_ResetMovement,
+					[MoveComp]()
+					{
+						if (IsValid(MoveComp) && MoveComp->MovementMode == MOVE_Falling)
+						{
+							MoveComp->SetMovementMode(MOVE_Walking);
+						}
+					},
+					0.5f,
+					false
+				);
 			}
 		}
 		// 큐브
