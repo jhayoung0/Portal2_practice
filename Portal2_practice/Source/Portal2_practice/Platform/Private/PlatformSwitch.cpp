@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "PlatformSwitch.h"
-#include "ComponentHelper.h"
+#include "FComponentHelper.h"
 #include "FMaterialHelper.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -22,8 +22,8 @@ void APlatformSwitch::BeginPlay()
 	this->ElapsedTime = 0;
 	this->bActivateState = false;
 
-	SwitchButton = ComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
-	SwitchCollision = ComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
+	SwitchButton = FComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
+	SwitchCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
 
 	if( SwitchButton != nullptr)
 	{

@@ -19,6 +19,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos);
 
 private:
 	void AddElapsedTime();
