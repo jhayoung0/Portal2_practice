@@ -25,21 +25,11 @@ private:
 	float LerpAlpha() const;
 	bool ActivateTrigger();
 	FLinearColor GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const;
-
+	
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 						UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-						bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-					  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-#pragma region JUMP
-	void JumpCharacter(AActor* TargetActor) const;
-	void JumpPhysics(const AActor* TargetActor) const;
-#pragma endregion
-	
+						bool bFromSweep, const FHitResult& SweepResult);	
 public:
 	float ElapsedTime = 0.0f;
 
@@ -76,11 +66,19 @@ public:
 	UPROPERTY()
 	class AActor* InOtherActor;
 
-#pragma region JUMP
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="JUMP")
-	class UArrowComponent* JumpDirection;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="JUMP")
-	float JumpPower = 1500.0f;
-#pragma endregion	
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	float TotalTime = 1.5f;   // 이동 전체 시간 (초)
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	float Height = 300.f;     // 아치 높이 (포물선 최대 높이)
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	class AActor* LandingActor;
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	bool  bShowLine = false;
+
+	FVector StartPos;         // 시작 좌표
+	FVector EndPos;           // 도착 좌표
+	float   Elapsed = 0.f;    // 경과 시간
+	bool    bIsJumping = false;
+	bool    bPhysicsRestored = false;
 };

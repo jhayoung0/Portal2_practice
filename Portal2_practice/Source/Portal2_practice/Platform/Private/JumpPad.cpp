@@ -2,17 +2,16 @@
 
 #include "JumpPad.h"
 #include "ComponentHelper.h"
+#include "FMathHelper.h"
 
 #include "Kismet/KismetMathLibrary.h"
-#include "Components/ArrowComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 
-#define JUMP_DIRECTION_PATH			TEXT("Arrow_JumpDirection")
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")
 #define SWITCH_COLLISION_PATH		TEXT("Collision")
 
 #define PLAYER_TAG					FName("Player")
-
 
 AJumpPad::AJumpPad()
 {
@@ -27,18 +26,17 @@ void AJumpPad::BeginPlay()
 	this->DetectTarget = false;
 	this->ElapsedTime = 0;
 
-	JumpDirection = ComponentHelper::FindComponentByNameRecursive<UArrowComponent>(this, JUMP_DIRECTION_PATH);
 	SwitchButton = ComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
 	SwitchCollision = ComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
 
-	if( SwitchButton != nullptr)
+	if (SwitchButton != nullptr)
 	{
 		MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
-		MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
+		MaterialButton->SetVectorParameterValue(ColorParam, IdleColor);
 		OriginVector = SwitchButton->GetRelativeLocation();
 
 		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
-		SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &AJumpPad::OnEndOverlap);
+		// SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &AJumpPad::OnEndOverlap);
 	}
 }
 
@@ -46,11 +44,11 @@ void AJumpPad::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if ( DetectTarget == false)
+	if (DetectTarget == false)
 		return;
-
+	
 	AddElapsedTime();
-
+	
 	const auto AlphaValue = LerpAlpha();
 	// ULOG(Warning, "LerpAlpha : %f", LerpAlpha() );
 
@@ -58,30 +56,58 @@ void AJumpPad::Tick(float DeltaTime)
 		const auto Color_A = GetVectorParameterValue(MaterialButton, ColorParam);
 		const auto Color_B = WarningColor;
 		const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
-		
-		MaterialButton->SetVectorParameterValue( ColorParam, Color_Result );
+
+		MaterialButton->SetVectorParameterValue(ColorParam, Color_Result);
 	}
 
 	{
 		const auto Vector_A = SwitchButton->GetRelativeLocation();
 		const auto Vector_B = EndVector;
-		const auto Vector_Result = UKismetMathLibrary::VLerp( Vector_A, Vector_B, AlphaValue);
+		const auto Vector_Result = UKismetMathLibrary::VLerp(Vector_A, Vector_B, AlphaValue);
 
 		SwitchButton->SetRelativeLocation(Vector_Result);
 	}
 
-	if( ActivateTrigger() )
+	if (!bIsJumping || !InOtherActor) return;
+	
+	// 궤적 이동 (0.0 ~ 1.0)
+	FVector NewPos = FMathHelper::CalcParabola(StartPos, EndPos, Height, AlphaValue);
+	InOtherActor->SetActorLocation(NewPos, true);
+
+
+	// 거의 도착했을 때 → 물리/이동 복구
+	if (AlphaValue >= 0.85f && !bPhysicsRestored)
 	{
-		if ( InOtherActor->Tags.Contains(PLAYER_TAG) )
+		FVector PrevPos = FMathHelper::CalcParabola(StartPos, EndPos, Height, AlphaValue - 0.01f);
+		FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
+
+		// 캐릭터
+		if (ACharacter* Player = Cast<ACharacter>(InOtherActor))
 		{
-			JumpCharacter(InOtherActor);
+			if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
+			{
+				MoveComp->SetMovementMode(MOVE_Falling); // 점프 상태
+				MoveComp->Velocity = Velocity;
+			}
 		}
-		else
+		// 큐브
+		else if (UStaticMeshComponent* MeshComp = InOtherActor->FindComponentByClass<UStaticMeshComponent>())
 		{
-			JumpPhysics(InOtherActor);
+			MeshComp->SetSimulatePhysics(true);
+			// MeshComp->SetPhysicsLinearVelocity(Velocity, true);
 		}
+
+		bPhysicsRestored = true;
 	}
-}
+
+	// 끝났으면 상태 초기화
+	if (AlphaValue >= 1.0f)
+	{
+		bIsJumping = false;
+		InOtherActor = nullptr;
+		Elapsed = 0.0f;
+	}
+ }
 
 void AJumpPad::AddElapsedTime()
 {
@@ -90,14 +116,14 @@ void AJumpPad::AddElapsedTime()
 
 float AJumpPad::LerpAlpha() const
 {
-	return UKismetMathLibrary::FClamp( ElapsedTime / Duration, 0.0f, 1.0f );
+	return UKismetMathLibrary::FClamp(ElapsedTime / Duration, 0.0f, 1.0f);
 }
 
 bool AJumpPad::ActivateTrigger()
 {
 	TriggerDelay -= GetWorld()->GetDeltaSeconds();
 
-	if ( TriggerDelay < 0 )
+	if (TriggerDelay < 0)
 	{
 		TriggerDelay = Duration;
 		return true;
@@ -106,14 +132,14 @@ bool AJumpPad::ActivateTrigger()
 	return false;
 }
 
-FLinearColor AJumpPad::GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const
+FLinearColor AJumpPad::GetVectorParameterValue(UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName) const
 {
-	if ( MaterialInstance == nullptr )
+	if (MaterialInstance == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GetVectorParameterValueSafe: MaterialInstance is null"));
 		return FLinearColor::Black;
 	}
-	
+
 	return MaterialInstance->K2_GetVectorParameterValue(ParamName);
 }
 
@@ -125,43 +151,33 @@ void AJumpPad::OnBeginOverlap(
 
 	this->DetectTarget = true;
 	this->ElapsedTime = 0.0;
-}
-
-void AJumpPad::OnEndOverlap(
-	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	this->InOtherActor = nullptr;
-
-	this->DetectTarget = false;
-	this->ElapsedTime = 0.0;
-
-	MaterialButton->SetVectorParameterValue( ColorParam, IdleColor );
-	SwitchButton->SetRelativeLocation(OriginVector);
-}
-
-#pragma region JUMP
-void AJumpPad::JumpCharacter(AActor* TargetActor) const
-{
-	ACharacter* Player = Cast<ACharacter>(TargetActor);
-
-	if ( Player != nullptr )
-		Player->LaunchCharacter(JumpDirection->GetForwardVector() * JumpPower, false, false);
-}
-
-void AJumpPad::JumpPhysics(const AActor* TargetActor) const
-{
-	UStaticMeshComponent* MeshComp = TargetActor->FindComponentByClass<UStaticMeshComponent>();
-	if (MeshComp && MeshComp->IsSimulatingPhysics())
+	this->bPhysicsRestored = false;
+	
+	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
 	{
-		FVector ForceDir = JumpDirection ? JumpDirection->GetForwardVector() : FVector::UpVector;
-		UE_LOG(LogTemp, Warning, TEXT("Impulse Dir: %s"), *ForceDir.ToString());
-		MeshComp->AddImpulse(ForceDir * JumpPower, NAME_None, true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No physics or invalid component."));
-	}
+		StartPos = Player->GetActorLocation();
+		EndPos = LandingActor->GetActorLocation(); // 미리 배치한 도착 지점
+		bIsJumping = true;
 
+		if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
+			MoveComp->DisableMovement();
+	
+		if (bShowLine)
+			FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
+	}
+	else if (UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
+	{
+		// 물리 큐브 처리
+		if (MeshComp->IsSimulatingPhysics())
+		{
+			StartPos   = MeshComp->GetComponentLocation();
+			EndPos     = LandingActor->GetActorLocation();
+			bIsJumping = true;
+	
+			MeshComp->SetSimulatePhysics(false); // 이동 중 물리 끄기
+	
+			if (bShowLine)
+				FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
+		}
+	}
 }
-#pragma endregion
