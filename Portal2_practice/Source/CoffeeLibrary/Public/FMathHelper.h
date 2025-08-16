@@ -126,17 +126,17 @@ struct FMathHelper
 		UWorld* World,
 		const FVector& Start,
 		const FVector& End,
-		float Height,
-		int32 NumSegments = 20,
-		float LifeTime = 2.0f,
-		FColor Color = FColor::Green)
+		const float Height,
+		const int32 NumSegments = 20,
+		const float LifeTime = 2.0f,
+		const FColor Color = FColor::Green)
 	{
 		if (!World) return;
 
 		FVector PrevPos = Start;
 		for (int32 i = 1; i <= NumSegments; ++i)
 		{
-			float Alpha = (float)i / (float)NumSegments;
+			const float Alpha = (float)i / (float)NumSegments;
 			FVector CurrPos = InterpArcSin(Start, End, Height, Alpha);
 
 			DrawDebugLine(World, PrevPos, CurrPos, Color, false, LifeTime, 0, 1.5f);
