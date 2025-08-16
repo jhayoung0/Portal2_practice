@@ -26,7 +26,6 @@ private:
 	void AddElapsedTime();
 	float LerpAlpha() const;
 	bool ActivateTrigger();
-	FLinearColor GetVectorParameterValue( UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName ) const;
 	
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

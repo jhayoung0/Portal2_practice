@@ -3,6 +3,7 @@
 #include "JumpPad.h"
 #include "ComponentHelper.h"
 #include "FMathHelper.h"
+#include "FMaterialHelper.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,8 +11,6 @@
 
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")
 #define SWITCH_COLLISION_PATH		TEXT("Collision")
-
-#define PLAYER_TAG					FName("Player")
 
 AJumpPad::AJumpPad()
 {
@@ -23,7 +22,6 @@ void AJumpPad::BeginPlay()
 	Super::BeginPlay();
 
 	this->TriggerDelay = Duration;
-	this->DetectTarget = false;
 	this->ElapsedTime = 0;
 
 	SwitchButton = ComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
@@ -36,7 +34,6 @@ void AJumpPad::BeginPlay()
 		OriginVector = SwitchButton->GetRelativeLocation();
 
 		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
-		// SwitchCollision->OnComponentEndOverlap.AddDynamic(this, &AJumpPad::OnEndOverlap);
 	}
 }
 
@@ -44,17 +41,17 @@ void AJumpPad::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (DetectTarget == false)
+	if (!bIsJumping || !InOtherActor)
 		return;
-	
+
 	AddElapsedTime();
 	
 	const auto AlphaValue = LerpAlpha();
 	// ULOG(Warning, "LerpAlpha : %f", LerpAlpha() );
 
 	{
-		const auto Color_A = GetVectorParameterValue(MaterialButton, ColorParam);
-		const auto Color_B = WarningColor;
+		const auto Color_A = FMaterialHelper::GetVectorParameterValueSafe(MaterialButton, ColorParam);
+		const auto Color_B = IdleColor;
 		const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
 
 		MaterialButton->SetVectorParameterValue(ColorParam, Color_Result);
@@ -62,27 +59,23 @@ void AJumpPad::Tick(float DeltaTime)
 
 	{
 		const auto Vector_A = SwitchButton->GetRelativeLocation();
-		const auto Vector_B = EndVector;
+		const auto Vector_B = OriginVector;
 		const auto Vector_Result = UKismetMathLibrary::VLerp(Vector_A, Vector_B, AlphaValue);
 
 		SwitchButton->SetRelativeLocation(Vector_Result);
 	}
 
-	if (!bIsJumping || !InOtherActor) return;
-	
 	// 궤적 이동 (0.0 ~ 1.0)
-	FVector NewPos = FMathHelper::CalcParabola(StartPos, EndPos, Height, AlphaValue);
+	FVector NewPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue);
 	InOtherActor->SetActorLocation(NewPos, true);
-
 
 	// 거의 도착했을 때 → 물리/이동 복구
 	if (AlphaValue >= 0.85f && !bPhysicsRestored)
 	{
-		FVector PrevPos = FMathHelper::CalcParabola(StartPos, EndPos, Height, AlphaValue - 0.01f);
+		FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
 		FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
 
-		// 캐릭터
-		if (ACharacter* Player = Cast<ACharacter>(InOtherActor))
+		if (auto Player = Cast<ACharacter>(InOtherActor))
 		{
 			if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
 			{
@@ -105,17 +98,14 @@ void AJumpPad::Tick(float DeltaTime)
 				);
 			}
 		}
-		// 큐브
-		else if (UStaticMeshComponent* MeshComp = InOtherActor->FindComponentByClass<UStaticMeshComponent>())
+		else if (auto MeshComp = InOtherActor->FindComponentByClass<UStaticMeshComponent>())
 		{
 			MeshComp->SetSimulatePhysics(true);
-			// MeshComp->SetPhysicsLinearVelocity(Velocity, true);
 		}
 
 		bPhysicsRestored = true;
 	}
 
-	// 끝났으면 상태 초기화
 	if (AlphaValue >= 1.0f)
 	{
 		bIsJumping = false;
@@ -147,49 +137,43 @@ bool AJumpPad::ActivateTrigger()
 	return false;
 }
 
-FLinearColor AJumpPad::GetVectorParameterValue(UMaterialInstanceDynamic* MaterialInstance, const FName& ParamName) const
-{
-	if (MaterialInstance == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GetVectorParameterValueSafe: MaterialInstance is null"));
-		return FLinearColor::Black;
-	}
-
-	return MaterialInstance->K2_GetVectorParameterValue(ParamName);
-}
-
 void AJumpPad::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (InOtherActor == OtherActor)
+		return;
+	
 	this->InOtherActor = OtherActor;
-
-	this->DetectTarget = true;
 	this->ElapsedTime = 0.0;
 	this->bPhysicsRestored = false;
+
+	MaterialButton->SetVectorParameterValue(ColorParam, WarningColor);
+	SwitchButton->SetRelativeLocation(EndVector);
 	
-	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
+	if (auto* Player = Cast<ACharacter>(OtherActor))
 	{
-		StartPos = Player->GetActorLocation();
-		EndPos = LandingActor->GetActorLocation(); // 미리 배치한 도착 지점
+		StartPos	= InOtherActor->GetActorLocation();
+		EndPos		= LandingActor->GetActorLocation();
 		bIsJumping = true;
 
-		if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
+		// 이동 중 물리 끄기
+		if (auto MoveComp = Player->GetCharacterMovement())
 			MoveComp->DisableMovement();
 	
 		if (bShowLine)
 			FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
 	}
-	else if (UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
+	else if (auto* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
 	{
-		// 물리 큐브 처리
 		if (MeshComp->IsSimulatingPhysics())
 		{
-			StartPos   = MeshComp->GetComponentLocation();
+			StartPos   = InOtherActor->GetActorLocation(); //MeshComp->GetComponentLocation();
 			EndPos     = LandingActor->GetActorLocation();
 			bIsJumping = true;
-	
-			MeshComp->SetSimulatePhysics(false); // 이동 중 물리 끄기
+
+			// 이동 중 물리 끄기
+			MeshComp->SetSimulatePhysics(false);
 	
 			if (bShowLine)
 				FMathHelper::DrawParabolaDebug(GetWorld(), StartPos, EndPos, Height, 20, 2.0f, FColor::Red);
