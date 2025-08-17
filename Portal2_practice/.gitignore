@@ -1,0 +1,79 @@
+# -------------------------------
+# Unreal Engine Git Ignore List
+# -------------------------------
+
+# Engine-generated folders
+Intermediate/
+Saved/
+DerivedDataCache/
+Build/
+
+# Engine-generated files
+*.sdf
+*.opensdf
+*.sln
+*.suo
+*.VC.db
+*.VC.opendb
+*.log
+*.tmp
+*_BuiltData.uasset
+
+# Ignore auto-generated screenshots
+Saved/AutoScreenshot.png
+Saved/Autosaves/
+SourceArt/**/*.png
+SourceArt/**/*.tga
+
+# Allow specific asset types
+!Content/**/*.uasset
+!Content/**/*.umap
+
+# Binary files
+Binaries/
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Configuration
+Config/DefaultEditor.ini
+Config/DefaultEngine.ini
+Config/DefaultGame.ini
+
+# Visual Studio
+.vs/
+*.obj
+*.o
+*.lo
+*.slo
+*.lib
+*.a
+*.la
+*.lai
+*.exe
+*.out
+*.app
+*.ipa
+*.dll
+*.dylib
+*.so
+*.pch
+*.gch
+*.mod
+
+# Ignore project files that can be regenerated
+*.xcodeproj
+*.xcworkspace
+
+# Prevent ignoring icons in Build folder
+!Build/**/*.ico
+!Build/**/PakBlacklist*.txt
+
+# Explicitly allow these folders
+!Build/*/
+
+!.uproject
+!Source/
+!Content//.uasset
+!Content/*/.umap
+Portal2_practice/Intermediate
+Portal2_practice/Saved
