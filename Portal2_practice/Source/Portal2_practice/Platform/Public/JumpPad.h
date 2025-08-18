@@ -19,7 +19,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	void RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos);
+	void RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos, const FVector& InVelocity);
 
 private:
 	void AddElapsedTime();
@@ -82,8 +82,14 @@ public:
 	UPROPERTY(EditAnywhere, Category="JumpPad")
 	FVector OutCubeForceVelocity = FVector(0,0,0);
 
+private:
 	FVector StartPos;         // 시작 좌표
 	FVector EndPos;           // 도착 좌표
 	bool    bIsJumping = false;
 	bool    bPhysicsRestored = false;
+	
+	FVector LastInterpPos = FVector::ZeroVector;
+	double  LastInterpTime = 0.0;
+	bool    bHasLastInterp = false;
+	FVector LastComputedVelocity = FVector::ZeroVector; // 로깅/복구용
 };

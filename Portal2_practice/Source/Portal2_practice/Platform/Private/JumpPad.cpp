@@ -72,33 +72,51 @@ void AJumpPad::Tick(float DeltaTime)
 
 	if (!bIsJumping || !InOtherActor)
 		return;
-	
-	// 궤적 이동 (0.0 ~ 1.0)
-	FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
-	FVector NewPos  = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue);
 
+	// ── FPS 독립: 실제 지난 위치/시간으로 속도 계산 ─────────────────────
+	const double Now = GetWorld()->GetTimeSeconds();
+	const FVector NewPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue);
+	
 	FHitResult Hit;
 	InOtherActor->SetActorLocation(NewPos, true, &Hit);
 
+	// Δt 계산 (최소값 클램프)
+	const double Dt = FMath::Max(1e-6, Now - LastInterpTime);
+
+	// PrevPos는 '진짜 지난 프레임 위치'
+	FVector Velocity = FVector::ZeroVector;
+	if (bHasLastInterp)
+	{
+		Velocity = (NewPos - LastInterpPos) / Dt;
+		LastComputedVelocity = Velocity; // 복구용 저장
+	}
+
+	// 다음 프레임 대비 갱신
+	LastInterpPos = NewPos;
+	LastInterpTime = Now;
+	bHasLastInterp = true;
+	// ────────────────────────────────────────────────────────────────
+	
 	if (Hit.IsValidBlockingHit() && !bPhysicsRestored )
 	{
 		// 충돌했다
-		InOtherActor->SetActorLocation(PrevPos, false);
+		InOtherActor->SetActorLocation(LastInterpPos, false);
 
-		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos);
+		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos, LastComputedVelocity);
 
 		bIsJumping = false;
 		InOtherActor = nullptr;
 		ElapsedTime = 0.f;
 
+		// 다음 점프를 위해 리셋
+		bHasLastInterp = false;
 		SetActorTickEnabled(false);
 		return;
 	}
 
 	if (AlphaValue >= 0.85f && !bPhysicsRestored)
 	{
-		// 거의 다 도착했다.
-		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos);
+		RestorePhysicsOrMovement(DeltaTime, AlphaValue, NewPos, LastComputedVelocity);
 	}
 
 	if (AlphaValue >= 1.0f)
@@ -107,28 +125,30 @@ void AJumpPad::Tick(float DeltaTime)
 		InOtherActor = nullptr;
 		ElapsedTime = 0.0f;
 
+		// 다음 점프를 위해 리셋
+		bHasLastInterp = false;
 		SetActorTickEnabled(false);
 	}
  }
 
 
-void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos )
+void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos, const FVector& InVelocity)
 {
+	const FVector FinalVelocity = [&]()
+	{
+		if (bUseForcChracterVelocity) return OutCharacterForceVelocity;
+		if (bUseForceCubeVelocity)    return OutCubeForceVelocity;
+		return InVelocity; // 계산된 근사 속도
+	}();
+	
 	if (ACharacter* Player = Cast<ACharacter>(InOtherActor))
 	{
 		if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
 		{
-			FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
-			FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
+			MoveComp->SetMovementMode(MOVE_Falling);
+			MoveComp->Velocity = FinalVelocity;
 
-			if ( bUseForcChracterVelocity )
-				Velocity = OutCharacterForceVelocity;
-			
-			MoveComp->SetMovementMode(MOVE_Falling); // 점프 상태
-			MoveComp->Velocity = Velocity;
-
-
-			ULOG(Warning, "Character Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", Velocity.X, Velocity.Y, Velocity.Z, Velocity.Size());
+			ULOG(Warning, "Character Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", FinalVelocity.X, FinalVelocity.Y, FinalVelocity.Z, FinalVelocity.Size());
 
 			// 1초 뒤에 Walking 모드로 복구
 			FTimerHandle TimerHandle_ResetMovement;
@@ -148,17 +168,10 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 	}
 	else if (UStaticMeshComponent* MeshComp = InOtherActor->FindComponentByClass<UStaticMeshComponent>())
 	{
-		FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
-		FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
-
-		if ( bUseForceCubeVelocity )
-			Velocity = OutCubeForceVelocity;
-
-		
-		ULOG(Warning, "Cube Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", Velocity.X, Velocity.Y, Velocity.Z, Velocity.Size());
+		ULOG(Warning, "Character Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", FinalVelocity.X, FinalVelocity.Y, FinalVelocity.Z, FinalVelocity.Size());
 		
 		MeshComp->SetSimulatePhysics(true);
-		MeshComp->SetPhysicsLinearVelocity(Velocity);
+		MeshComp->SetPhysicsLinearVelocity(FinalVelocity);
 	}
 
 	bPhysicsRestored = true;
@@ -205,6 +218,10 @@ void AJumpPad::OnBeginOverlap(
 	this->ElapsedTime = 0.0;
 	this->bPhysicsRestored = false;
 	this->bIsJumping = true;
+
+	this->LastInterpPos = StartPos;
+	this->LastInterpTime = GetWorld()->GetTimeSeconds();
+	this->bHasLastInterp = false;
 
 	SetActorTickEnabled(true);
 
