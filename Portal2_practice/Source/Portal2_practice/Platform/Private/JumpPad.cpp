@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "JumpPad.h"
+#include "ULog.h"
 
 #include "FComponentHelper.h"
 #include "FMaterialHelper.h"
@@ -79,7 +80,7 @@ void AJumpPad::Tick(float DeltaTime)
 	FHitResult Hit;
 	InOtherActor->SetActorLocation(NewPos, true, &Hit);
 
-	if (Hit.IsValidBlockingHit())
+	if (Hit.IsValidBlockingHit() && !bPhysicsRestored )
 	{
 		// 충돌했다
 		InOtherActor->SetActorLocation(PrevPos, false);
@@ -119,9 +120,15 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 		{
 			FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
 			FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
+
+			if ( bUseForcChracterVelocity )
+				Velocity = OutCharacterForceVelocity;
 			
 			MoveComp->SetMovementMode(MOVE_Falling); // 점프 상태
 			MoveComp->Velocity = Velocity;
+
+
+			ULOG(Warning, "Character Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", Velocity.X, Velocity.Y, Velocity.Z, Velocity.Size());
 
 			// 1초 뒤에 Walking 모드로 복구
 			FTimerHandle TimerHandle_ResetMovement;
@@ -143,6 +150,12 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 	{
 		FVector PrevPos = FMathHelper::InterpArcSin(StartPos, EndPos, Height, AlphaValue - 0.01f);
 		FVector Velocity = (NewPos - PrevPos) / DeltaTime; // 근사 속도
+
+		if ( bUseForceCubeVelocity )
+			Velocity = OutCubeForceVelocity;
+
+		
+		ULOG(Warning, "Cube Velocity: X=%.2f Y=%.2f Z=%.2f | Size=%.2f", Velocity.X, Velocity.Y, Velocity.Z, Velocity.Size());
 		
 		MeshComp->SetSimulatePhysics(true);
 		MeshComp->SetPhysicsLinearVelocity(Velocity);

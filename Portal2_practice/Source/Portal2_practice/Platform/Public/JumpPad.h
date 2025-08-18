@@ -73,6 +73,15 @@ public:
 	UPROPERTY(EditAnywhere, Category="JumpPad")
 	bool  bShowLine = false;
 
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	bool  bUseForcChracterVelocity  = false;
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	bool  bUseForceCubeVelocity  = false;
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	FVector OutCharacterForceVelocity = FVector(0,0,0);
+	UPROPERTY(EditAnywhere, Category="JumpPad")
+	FVector OutCubeForceVelocity = FVector(0,0,0);
+
 	FVector StartPos;         // 시작 좌표
 	FVector EndPos;           // 도착 좌표
 	bool    bIsJumping = false;
