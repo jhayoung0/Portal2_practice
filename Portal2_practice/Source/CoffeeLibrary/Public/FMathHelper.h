@@ -95,7 +95,8 @@ struct FMathHelper
 		for (int32 i = 1; i <= NumSegments; ++i)
 		{
 			float t = StepTime * i;
-			FVector CurrPos = Start + V0 * t + 0.5f * g * t * t;
+			FVector CurrPos = SolveV0ForProjectile(PrevPos, CurrPos, t, GravityZ);
+			// Start + V0 * t + 0.5f * g * t * t;
 
 			DrawDebugLine(World, PrevPos, CurrPos, Color, false, LifeTime, 0, 1.5f);
 			PrevPos = CurrPos;
