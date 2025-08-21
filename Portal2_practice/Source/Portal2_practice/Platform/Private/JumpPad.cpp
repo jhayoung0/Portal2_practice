@@ -3,9 +3,9 @@
 #include "JumpPad.h"
 #include "ULog.h"
 
-#include "FComponentHelper.h"
-#include "FMaterialHelper.h"
-#include "FMathHelper.h"
+#include "Shared/FComponentHelper.h"
+#include "Shared/FMaterialHelper.h"
+#include "Shared/FMathHelper.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
