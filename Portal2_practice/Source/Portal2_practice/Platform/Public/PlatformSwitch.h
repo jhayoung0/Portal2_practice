@@ -82,5 +82,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="SwitchEvent")
 	bool bActivateState = false;
-#pragma endregion	
+#pragma endregion
+
+
+
 };
