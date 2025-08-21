@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FEaseHelper.h"
+#include "Shared/FEaseHelper.h"
 #include "Components/ActorComponent.h"
 #include "UEaseComponent.generated.h"
 
