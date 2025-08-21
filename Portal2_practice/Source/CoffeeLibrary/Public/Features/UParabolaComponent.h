@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FMathHelper.h"
+#include "Shared/FMathHelper.h"
 #include "Components/ActorComponent.h"
 #include "UParabolaComponent.generated.h"
 

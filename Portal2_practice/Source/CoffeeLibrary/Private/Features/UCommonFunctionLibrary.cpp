@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved.
 
-#include "UCoffeeCommonUtil.h"
+#include "Features/UCommonFunctionLibrary.h"
 #include "Misc/DateTime.h"
 //
 // void UCoffeeCommonUtil::TestULog()
@@ -45,18 +45,18 @@
 // 		TestIndex2, MyArrayCount, bIsIndex2InBounds ? TEXT("True") : TEXT("False"));
 // }
 
-bool UCoffeeCommonUtil::InBounds(const int32 Index, const int32 Count)
+bool UCommonFunctionLibrary::InBounds(const int32 Index, const int32 Count)
 {
 	return (Index >= 0) && (Index < Count);
 }
 
-int64 UCoffeeCommonUtil::GetNowTimestamp()
+int64 UCommonFunctionLibrary::GetNowTimestamp()
 {
 	const auto DataTime = FDateTime::UtcNow();
 	return DataTime.ToUnixTimestamp();
 }
 
-int32 UCoffeeCommonUtil::GetFirstNumberInActorLabel(const AActor* Actor)
+int32 UCommonFunctionLibrary::GetFirstNumberInActorLabel(const AActor* Actor)
 {
 	for (const auto& Char : Actor->GetActorLabel())
 	{

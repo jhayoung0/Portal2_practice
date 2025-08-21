@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "PlatformSwitch.h"
-#include "FComponentHelper.h"
-#include "FMaterialHelper.h"
+#include "Shared/FComponentHelper.h"
+#include "Shared/FMaterialHelper.h"
 #include "Kismet/KismetMathLibrary.h"
 
 #define SWITCH_BUTTON_PATH			TEXT("Mesh_SwitchButton")

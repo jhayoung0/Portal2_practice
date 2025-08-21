@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CoffeeMacro.h"
+#include "Core/Macro.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "UObjectPoolManager.generated.h"
 
@@ -20,6 +20,9 @@ public:
     
     UFUNCTION(BlueprintCallable, Category="Pool", meta = (WorldContext = "WorldContextObject"))
     AActor* GetPoolItem(const UObject* WorldContextObject, TSubclassOf<AActor> InClass);
+
+    UFUNCTION(BlueprintCallable, Category="Pool", meta = (WorldContext = "WorldContextObject"))
+    AActor* GetPoolItemLocationRotator(const UObject* WorldContextObject, const TSubclassOf<AActor> InClass, const FVector Location, const FRotator Rotator );
     
     UFUNCTION(BlueprintCallable, Category="Pool")
     void ReturnActorToPool(AActor* Actor);

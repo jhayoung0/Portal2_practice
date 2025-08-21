@@ -3,10 +3,10 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UCoffeeCommonUtil.generated.h"
+#include "UCommonFunctionLibrary.generated.h"
 
 UCLASS()
-class COFFEELIBRARY_API UCoffeeCommonUtil : public UBlueprintFunctionLibrary
+class COFFEELIBRARY_API UCommonFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
