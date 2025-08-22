@@ -43,21 +43,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cube")
 	FName DisolveParam = FName("Disolve");
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UStaticMeshComponent* BodyMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UMaterialInstanceDynamic* BodyMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UStaticMeshComponent* CoverMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UMaterialInstanceDynamic* CoverMaterial;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UStaticMeshComponent* SymbolMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Cube")
-	class UMaterialInstanceDynamic* SymbolMaterial;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cube")
 	float DissolveDuration = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cube")
@@ -66,6 +51,21 @@ public:
 	float DissolveEnd = 1.0f;
 	
 private:
+	UPROPERTY()
+	class UStaticMeshComponent* BodyMesh;
+	UPROPERTY()
+	class UMaterialInstanceDynamic* BodyMaterial;
+
+	UPROPERTY()
+	class UStaticMeshComponent* CoverMesh;
+	UPROPERTY()
+	class UMaterialInstanceDynamic* CoverMaterial;
+	
+	UPROPERTY()
+	class UStaticMeshComponent* SymbolMesh;
+	UPROPERTY()
+	class UMaterialInstanceDynamic* SymbolMaterial;
+	
 	FTimerHandle DissolveTimerHandle;
 	float DissolveElapsed = 0.0f;
 };
