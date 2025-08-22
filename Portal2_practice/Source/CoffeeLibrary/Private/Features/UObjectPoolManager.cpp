@@ -2,6 +2,8 @@
 
 #include "Features/UObjectPoolManager.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 
 void UObjectPoolManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -68,6 +70,30 @@ void UObjectPoolManager::ReturnActorToPool(AActor* Actor)
 	Actor->SetActorHiddenInGame(true);
 	Actor->SetActorEnableCollision(false);
 	Actor->SetActorTickEnabled(false);
+
+	// 타이머/수명 정리
+	if (UWorld* World = Actor->GetWorld())
+	{
+		World->GetTimerManager().ClearAllTimersForObject(Actor);
+	}
+	Actor->SetLifeSpan(0.f);
+
+	if (UProjectileMovementComponent* Proj = Actor->FindComponentByClass<UProjectileMovementComponent>())
+	{
+		Proj->StopMovementImmediately();
+		Proj->Deactivate();
+	}
+	if (UCharacterMovementComponent* CharMove = Actor->FindComponentByClass<UCharacterMovementComponent>())
+	{
+		CharMove->StopMovementImmediately();
+		CharMove->Velocity = FVector::ZeroVector;
+	}
+	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Actor->GetRootComponent()))
+	{
+		Prim->SetPhysicsLinearVelocity(FVector::ZeroVector, true);
+		Prim->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector, true);
+		Prim->PutRigidBodyToSleep();
+	}
 
 	TSubclassOf<AActor> ActorClass = Actor->GetClass();
 	TArray<AActor*>& Pool = PoolMap.FindOrAdd(ActorClass);

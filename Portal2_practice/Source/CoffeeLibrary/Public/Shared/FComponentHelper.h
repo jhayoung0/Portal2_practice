@@ -10,9 +10,20 @@ struct FComponentHelper
 	template<typename T>
 	static T* LoadAsset(const TCHAR* Path)
 	{
+		static_assert(std::is_base_of<UObject, T>::value, "T must derive from UObject");
+		
 		ConstructorHelpers::FObjectFinder<T> Obj(Path);
 		return Obj.Succeeded() ? Obj.Object.Get() : nullptr;
 	}
+	
+    template<typename T>
+    static TSubclassOf<T> LoadClass(const TCHAR* Path)
+    {
+        static_assert(std::is_base_of<UObject, T>::value, "T must derive from UObject");
+        
+        ConstructorHelpers::FClassFinder<T> Finder(Path);
+        return Finder.Succeeded() ? Finder.Class : nullptr;
+    }
 	
 	template<typename T>
 	static T* FindComponentByName(AActor* Owner, const FName& ComponentName)
