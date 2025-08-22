@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "PlatformSwitch.h"
+#include "PortalCube.h"
 #include "Shared/FComponentHelper.h"
 #include "Shared/FMaterialHelper.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -102,6 +103,10 @@ void APlatformSwitch::OnBeginOverlap(
 
 	this->DetectTarget = true;
 	this->ElapsedTime = 0.0;
+
+	auto PortalCube = Cast<APortalCube>(InOtherActor);
+	if ( IsValid(PortalCube))
+		PortalCube->ActivateCube();
 }
 
 void APlatformSwitch::OnEndOverlap(
@@ -118,6 +123,10 @@ void APlatformSwitch::OnEndOverlap(
 
 	// 물건이 떨어지면 올라가면 해제
 	this->ChangeActivateState(false);
+
+	auto PortalCube = Cast<APortalCube>(OtherActor);
+	if ( IsValid(PortalCube))
+		PortalCube->DeactivateCube();
 }
 
 #pragma region SwitchEvent

@@ -73,6 +73,8 @@ public:
 	UPROPERTY()
 	class AActor* InOtherActor;
 
+	
+
 #pragma region SwitchEvent
 	UFUNCTION(BlueprintCallable, Category="SwitchEvent")
 	void ChangeActivateState(bool State);
