@@ -17,12 +17,11 @@ public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnScore, int);
 	FOnScore OnScore;
 
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKill, int, Kill);
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnKill OnKill;
 
-
+	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMessage, FString, Msg);
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnMessage OnMessage;
