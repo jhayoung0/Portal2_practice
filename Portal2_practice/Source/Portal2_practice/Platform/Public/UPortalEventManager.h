@@ -36,4 +36,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Events")
 	void SendMovie(const int& InGroup, bool InState);
+
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDoor, int, Group, bool, State);
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnDoor OnDoor;
+
+	UFUNCTION(BlueprintCallable, Category="Events")
+	void SendDoor(const int& InGroup, bool InState);
 };

@@ -17,3 +17,8 @@ void UPortalEventManager::SendMovie(const int& InGroup, bool InState)
 {
 	OnMovie.Broadcast(InGroup, InState);
 }
+
+void UPortalEventManager::SendDoor(const int& InGroup, bool InState)
+{
+	OnDoor.Broadcast(InGroup, InState);
+}
