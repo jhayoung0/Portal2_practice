@@ -65,3 +65,27 @@ int32 UCommonFunctionLibrary::GetFirstNumberInActorLabel(const AActor* Actor)
 	}
 	return 0;
 }
+
+UMaterialInstanceDynamic* UCommonFunctionLibrary::GetOrCreateMID(
+	UPrimitiveComponent* Target, int32 ElementIndex, FName OptionalName)
+{
+	if (!Target)
+		return nullptr;
+
+	const int32 Num = Target->GetNumMaterials();
+	if (ElementIndex < 0 || ElementIndex >= Num)
+		return nullptr;
+
+	UMaterialInterface* CurMat = Target->GetMaterial(ElementIndex);
+	if (!CurMat)
+		return nullptr;
+
+	if (UMaterialInstanceDynamic* AsMID = Cast<UMaterialInstanceDynamic>(CurMat))
+		return AsMID;
+
+	UMaterialInstanceDynamic* NewMID = UMaterialInstanceDynamic::Create(CurMat, Target, OptionalName);
+	if (NewMID)
+		Target->SetMaterial(ElementIndex, NewMID);
+
+	return NewMID;
+}
