@@ -15,6 +15,7 @@ public class Portal2_practice : ModuleRules
 
 		// Platform/Public, Player/Public 폴더를 include 경로에 추가
 		PublicIncludePaths.AddRange(new string[] {
+			Path.Combine(ModuleDirectory, "Portal", "Public"),
 			Path.Combine(ModuleDirectory, "Platform", "Public"),
 			Path.Combine(ModuleDirectory, "Common", "Public"),
 		});

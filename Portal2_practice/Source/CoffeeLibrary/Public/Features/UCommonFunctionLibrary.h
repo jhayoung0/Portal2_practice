@@ -27,5 +27,11 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "GetFirstNumberInActorLabel"))
 	static int32 GetFirstNumberInActorLabel(const AActor* Actor);
+
+	UFUNCTION(BlueprintCallable, Category="Material", meta=(DefaultToSelf="Target", DisplayName="Get Or Create MID", AdvancedDisplay="OptionalName"))
+	static class UMaterialInstanceDynamic* GetOrCreateMID(
+		class UPrimitiveComponent* Target,
+		int32 ElementIndex,
+		FName OptionalName = NAME_None);
 };
 
