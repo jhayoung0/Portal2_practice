@@ -71,41 +71,36 @@ void APickupRifle::Tick(float DeltaTime)
 void APickupRifle::OnSphereCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//만약 상대가 플레이어라면
-	AFirstPersonCharacter* player = Cast<AFirstPersonCharacter*>(OtherActor);
-
-	
-	if (player != nullptr)
-	{
-		UWeaponComponent*  WeaponCP = NewObject<UWeaponComponent>(player);
-		WeaponCP->SetupAttachment(player->GetRootComponent());
-
-		
-
-		
-		WeaponCP->RegisterComponent();
-		WeaponCP->AttachToComponent(OtherActor->GetRootComponent(),  FAttachmentTransformRules::KeepRelativeTransform);
-		player->
-		
-		// 플레이어에게 weapon cp를 붙이기
-		
-	
-	}
-
-
-			
-
-		// weaponcp를 플레이어의 weaponcp변수로 set
-		
-		
-
-		
-	}
-	
-
-		
-
-	
+	// //만약 상대가 플레이어라면
+	// AFirstPersonCharacter* player = Cast<AFirstPersonCharacter*>(OtherActor);
+	//
+	//
+	// if (player != nullptr)
+	// {
+	// 	UWeaponComponent*  WeaponCP = NewObject<UWeaponComponent>(player);
+	// 	WeaponCP->SetupAttachment(player->GetRootComponent());
+	//
+	// 	
+	//
+	// 	
+	// 	WeaponCP->RegisterComponent();
+	// 	WeaponCP->AttachToComponent(OtherActor->GetRootComponent(),  FAttachmentTransformRules::KeepRelativeTransform);
+	// 	player->
+	// 	
+	// 	// 플레이어에게 weapon cp를 붙이기
+	// 	
+	//
+	// }
+	//
+	//
+	// 		
+	//
+	// 	// weaponcp를 플레이어의 weaponcp변수로 set
+	// 	
+	// 	
+	//
+	// 	
+	// }
 }
 
 
