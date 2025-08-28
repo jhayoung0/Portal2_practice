@@ -17,7 +17,8 @@ class PORTAL2_PRACTICE_API UWeaponComponent : public USkeletalMeshComponent
 public:
 
 	virtual void BeginPlay() override;
-
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	
 	// 변수 선언
@@ -37,6 +38,7 @@ public:
 	class AFirstPersonCharacter* player;
 
 
+	U
 
 	
 };

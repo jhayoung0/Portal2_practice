@@ -15,9 +15,19 @@ void UWeaponComponent::BeginPlay()
 		player = Cast<AFirstPersonCharacter>(Owner);
 	}
 
-	AttachToComponent(player->FirstPersonMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
+	AttachToComponent(player->FirstPersonMesh, FAttachmentTransformRules::SnapToTargetIncludingScale,
+	 TEXT("GripPoint"));
 
 	//player의 has rifle을 true로 set
 	player->HasRifle = true;
+	
+}
+
+void UWeaponComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	
 	
 }
