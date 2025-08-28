@@ -27,8 +27,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-	// 변수 선언
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UWeaponComponent* WeaponCP; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
+	TSubclassOf<class UWeaponComponent> WeaponCPClass;  // 설계도(클래스) 선택
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	class UWeaponComponent* WeaponCP = nullptr;         // 실제 인스턴스
+
 	
 };
