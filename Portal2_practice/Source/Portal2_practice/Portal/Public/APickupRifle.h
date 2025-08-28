@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "APickupRifle.generated.h"
 
+
+
+
+
 UCLASS()
 class PORTAL2_PRACTICE_API APickupRifle : public AActor
 {
@@ -36,23 +40,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* SkeletalMeshComp;
 
-	// 변수 선언
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> WdgAimClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> PortalGunStandClass;
 	
 	UFUNCTION()
 	void OnSphereCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-
-	//  BP의 "Skeletal Mesh Grip_Anim" (USkeletalMeshComponent의 BP 클래스)
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<USkeletalMeshComponent> WeaponCompBPClass;
 	
-	// weapon cp
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UWeaponComponent* WeaponCP; 
-
-
-	UPROPERTY(EditAnywhere)
-	class AFirstPersonCharacter* player; 
-
 };

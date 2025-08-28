@@ -2,11 +2,12 @@
 
 
 #include "APickupRifle.h"
-
 #include "FirstPersonCharacter.h"
 #include "WeaponComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -47,8 +48,7 @@ APickupRifle::APickupRifle()
 
 	SkeletalMeshComp->SetGenerateOverlapEvents(false);
 	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &APickupRifle::OnSphereCompOverlap);
+	
 	
 }
 
@@ -56,6 +56,8 @@ APickupRifle::APickupRifle()
 void APickupRifle::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &APickupRifle::OnSphereCompOverlap);
 	
 }
 
@@ -71,41 +73,68 @@ void APickupRifle::Tick(float DeltaTime)
 void APickupRifle::OnSphereCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
 	//만약 상대가 플레이어라면
-	AFirstPersonCharacter* player = Cast<AFirstPersonCharacter*>(OtherActor);
-
+	auto* Player = Cast<AFirstPersonCharacter>(OtherActor);
 	
-	if (player != nullptr)
+
+	if (Player)
 	{
-		UWeaponComponent*  WeaponCP = NewObject<UWeaponComponent>(player);
-		WeaponCP->SetupAttachment(player->GetRootComponent());
+		// 생성 (Outer는 Player)
+		UWeaponComponent* NewComp = NewObject<UWeaponComponent>(
+			Player,
+			Player->WeaponCPClass
+		);
 
-		
+		// 인스턴스 목록에 추가 
+		Player->AddInstanceComponent(NewComp);
+		NewComp->OnComponentCreated();
 
-		
-		WeaponCP->RegisterComponent();
-		WeaponCP->AttachToComponent(OtherActor->GetRootComponent(),  FAttachmentTransformRules::KeepRelativeTransform);
-		player->
-		
-		// 플레이어에게 weapon cp를 붙이기
-		
-	
-	}
+		// SceneComponent인 경우에만 Attach
+		if (USceneComponent* SC = Cast<USceneComponent>(NewComp))
+		{
+			SC->AttachToComponent(Player->GetRootComponent(),
+				FAttachmentTransformRules::KeepRelativeTransform);
+		}
 
+		// 등록
+		NewComp->RegisterComponent();
 
+		// 플레이어 변수에 셋팅
+		Player->WeaponCP = NewComp;
+
+		// AIM UI 생성 -> add to viewport
+		APlayerController* pc = Cast<APlayerController>(GetWorld()-> GetFirstPlayerController());
+		
+		if (pc)
+		{
+			UUserWidget* AimWidget = CreateWidget<UUserWidget>(pc, WdgAimClass);
 			
+			if (AimWidget)
+			{
+				AimWidget->AddToViewport();
+			}
+		}
+		
 
-		// weaponcp를 플레이어의 weaponcp변수로 set
-		
-		
+		// portalgun stand -> activate
 
-		
+		if (PortalGunStandClass)
+		{
+			AActor* Found = UGameplayStatics::GetActorOfClass(this, PortalGunStandClass);
+			if (Found)
+			{
+				if (UFunction* Fn = Found->FindFunction(FName("Activate")))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Activate success"));
+					Found->ProcessEvent(Fn, nullptr);
+				}
+			}
+		}
+
+		// destroy actor
+		Destroy();
 	}
-	
-
-		
-
-	
 }
 
 
