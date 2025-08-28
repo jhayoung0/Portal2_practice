@@ -26,26 +26,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCameraComponent* FirstPersonCamera;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USkeletalMeshComponent* FirstPersonMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USceneComponent* HL;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USceneComponent* HR;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	TSubclassOf<class UWeaponComponent> WeaponCPClass;  // 설계도(클래스) 선택
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
 	class UWeaponComponent* WeaponCP = nullptr;         // 실제 인스턴스
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool HasRifle;
 
 	
 };
