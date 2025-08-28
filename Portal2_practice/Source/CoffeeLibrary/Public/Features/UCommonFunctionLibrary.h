@@ -21,6 +21,9 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "InBounds"))
 	static bool InBounds(const int32 Index, const int32 Count);
+
+	UFUNCTION(BlueprintPure, Category="Utils|Array", meta=(CompactNodeTitle="RandElem", ArrayParm="TargetArray", ArrayTypeDependentParams="ReturnValue"))
+	static int32 GetRandomIndex(const TArray<int32>& TargetArray, bool& bIsValid);
 	
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "NowTimestamp"))
 	static int64 GetNowTimestamp();	

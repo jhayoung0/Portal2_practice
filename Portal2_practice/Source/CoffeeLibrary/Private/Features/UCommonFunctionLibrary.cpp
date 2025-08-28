@@ -50,6 +50,17 @@ bool UCommonFunctionLibrary::InBounds(const int32 Index, const int32 Count)
 	return (Index >= 0) && (Index < Count);
 }
 
+int32 UCommonFunctionLibrary::GetRandomIndex(const TArray<int32>& TargetArray, bool& bIsValid)
+{
+	if (TargetArray.Num() == 0)
+	{
+		bIsValid = false;
+		return INDEX_NONE;
+	}
+	bIsValid = true;
+	return TargetArray[FMath::RandRange(0, TargetArray.Num() - 1)];
+}
+
 int64 UCommonFunctionLibrary::GetNowTimestamp()
 {
 	const auto DataTime = FDateTime::UtcNow();
