@@ -102,7 +102,7 @@ public:
 	APlayerCameraManager* CamManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector AmmoSocket_loc  = GetSocketLocation(FName("AmmoSocket"));;
+	FVector AmmoSocket_loc;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator AmmoSocket_Rot;
 

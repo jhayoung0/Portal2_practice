@@ -58,29 +58,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> Portal2Class;
 
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FVector Portal1Loc;
+	FVector PortalLoc;
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FVector Portal1Forward;
+	FVector PortalForwardVector;
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FRotator Portal1Rot;
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FVector Portal2Loc;
-	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FVector Portal2Forward;
-	
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FRotator Portal2Rot;
+	FRotator PortalRot;
 	
 	UPROPERTY(EditAnywhere, Category="Sound")
 	USoundBase* bulletsound;
@@ -104,7 +91,7 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable, Category="Portal")
-	void SpawnPortal(TSubclassOf<APortalActor> PortalClass, FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
+	void SpawnPortal(TSubclassOf<APortalActor> PortalClass); // , FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
 	
 
 	UFUNCTION(BlueprintCallable, Category="Portal")

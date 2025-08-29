@@ -68,12 +68,11 @@ void UWeaponComponent::OnShootL(const FInputActionValue& value)
 	UE_LOG(LogTemp, Warning, TEXT("ShootL"));
 
 	player->NewlyCreatedPortal1 = false;
-	player->SpawnPortal(Portal1class,  player->Portal1Loc
-		, player->Portal1Forward, player->Portal1Rot);
+	player->SpawnPortal(Portal1class);
 	
 	Orangecore_DynMat = CreateAndSetMaterialInstanceDynamicFromMaterial(1, Bluecore);
 
-	if (!CamManager)
+    if (!CamManager)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("cammanager none"));
 	}
@@ -103,8 +102,7 @@ void UWeaponComponent::OnShootR(const FInputActionValue& value)
 	UE_LOG(LogTemp, Warning, TEXT("ShootR"));
 	
 	player->NewlyCreatedPortal2 = false;
-	player->SpawnPortal(Portal2class, player->Portal2Loc
-		, player->Portal2Forward, player->Portal2Rot);
+	player->SpawnPortal(Portal2class);
 	
 	Bluecore_DynMat = CreateAndSetMaterialInstanceDynamicFromMaterial(1, Orangecore);
 
@@ -133,6 +131,8 @@ void UWeaponComponent::OnShootR(const FInputActionValue& value)
 void UWeaponComponent::OnGrab(const FInputActionValue& value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab"));
+	AmmoSocket_loc  = GetSocketLocation(FName("AmmoSocket"));
+	
 
 	FVector Offset  = FVector(100.f, -20.f, -10.f);
 	FRotator CamRot = CamManager->GetCameraRotation();
@@ -159,7 +159,7 @@ void UWeaponComponent::OnGrab(const FInputActionValue& value)
 			UEngineTypes::ConvertToTraceType(ECC_Visibility),
 			false,
 			TArray<AActor*>(),        // 비움
-			EDrawDebugTrace::ForDuration,    
+			EDrawDebugTrace::None,    
 			Hit,
 			true                      // Ignore Self
 		);
@@ -188,6 +188,8 @@ void UWeaponComponent::OnGrab(const FInputActionValue& value)
 
 void UWeaponComponent::OnLinetrace(bool color)
 {
+	AmmoSocket_loc  = GetSocketLocation(FName("AmmoSocket"));
+	
 	FVector end = AmmoSocket_loc + (CamManager->GetActorForwardVector() * 500.f);
 
 	// LineTrace
@@ -214,8 +216,11 @@ AActor* UWeaponComponent::SpawnBullet(bool color)
 {
 	
 	TSubclassOf<AActor> BulletClass = color ? PortalBulletBlue : PortalBulletOrange;
+
 	
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(BulletClass,FVector(0), FRotator(0));
+
+	if (Spawned) {UE_LOG(LogTemp, Warning, TEXT("Spawned"))};
 	
 	return Spawned;
 	
@@ -224,27 +229,34 @@ AActor* UWeaponComponent::SpawnBullet(bool color)
 void UWeaponComponent::FlyBullet(FVector start, bool color, FVector EndImpactPoint, FVector EndBullet)
 // color는 true면 orange, false면 blue임.
 {
-	AActor* Bullet = SpawnBullet(color);
-	Bullet->SetActorLocation(start);
+	AActor* bullet = SpawnBullet(color);
+	bullet->SetActorLocation(start);
 
 	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget     = this;                     // 완료 함수가 있는 객체
-	LatentInfo.ExecutionFunction  = FName("OnMoveFinished");  // 완료 후 호출할 함수 이름
+	LatentInfo.CallbackTarget     = this;                     // 완료 함수가 있는 객체// 완료 후 호출할 함수 이름
 	LatentInfo.Linkage            = 0;                        // 보통 0
 	LatentInfo.UUID               = __LINE__;                 // 고유 ID (간단히 라인 넘버 쓰기도 함)
 	
-	UKismetSystemLibrary::MoveComponentTo(Bullet->GetRootComponent(), EndBullet,
+	UKismetSystemLibrary::MoveComponentTo(bullet->GetRootComponent(), EndBullet,
 		GetComponentRotation(), false, false, 0.1f,
 		false, EMoveComponentAction::Move, LatentInfo);
 
-	// 총알 삭제
-	Bullet->Destroy();
+	bullet->SetLifeSpan(0.12f);
+
 }
 
 void UWeaponComponent::OnMoveFinished(bool color, FVector EndImpactPoint)
 {
+	UE_LOG(LogTemp, Warning, TEXT("[MoveComponentTo] OnMoveFinished fired"));
+	
 	UParticleSystem* particle = color? VFX_Blue :  VFX_Orange;
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),particle, EndImpactPoint);
+
+
+	//if (hit)
+	//{
+	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particle, EndImpactPoint);
+	//}
+	
 }
 
 void UWeaponComponent::SetupInput(UEnhancedInputComponent* EIC)
