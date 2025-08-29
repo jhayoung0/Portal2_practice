@@ -120,8 +120,7 @@ void AFirstPersonCharacter::SetPortalLocAndRot(float forward_float, float compar
 
 
 // 포탈 스폰 함수
-void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass
-	,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
+void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spawn Portal"));
 	if (WeaponCP->CanShoot)
