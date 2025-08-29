@@ -117,26 +117,43 @@ void AFirstPersonCharacter::SetPortalLocAndRot(float forward_float, float compar
 	if (FMath::IsNearlyEqual(forward_float, comparison_value, T))
 	{
 		IsNearyEqual = true;
+
+		UE_LOG(LogTemp, Warning, TEXT("true"));
+		
+		UE_LOG(LogTemp, Warning, TEXT("forward_float = %f"), forward_float);
+		UE_LOG(LogTemp, Warning, TEXT("comparison_value = %f"), comparison_value);
+
+		
 	}
 	else
 	{
-		IsNearyEqual = false;		
+		IsNearyEqual = false;
+		UE_LOG(LogTemp, Warning, TEXT("false"));
+		UE_LOG(LogTemp, Warning, TEXT("forward_float = %f"), forward_float);
+		UE_LOG(LogTemp, Warning, TEXT("comparison_value = %f"), comparison_value);
+		
+		
 	}
 
 	// 포탈 전방 벡터에 따라 회전과 위치 설정
 	if (IsNearyEqual)
 	{
-		PortalRotation = Rot;
-		PortalLocation += Offset;
+		PortalRot = Rot;
+		PortalLoc += Offset;
+
+		
+		
+		return;
 	}
 	
 }
 
 
 // 포탈 스폰 함수
-void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
+void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass) // ,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spawn Portal"));
+	
 	if (WeaponCP->CanShoot)
 	{
 
@@ -152,58 +169,62 @@ void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass,FV
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel3));//Wall
 		
-		UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld()
+		bool hitsuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld()
 			,ArrowComp->GetComponentLocation()
 			,endloc
 			,ObjectTypes
 			,false
 			,TArray<AActor*>()
-			,EDrawDebugTrace::Type::None
+			,EDrawDebugTrace::Type::ForDuration
 			,Hit
 			,true);
 
-		
-		PortalLoc = Hit.ImpactPoint;
-		PortalForwardVector = Hit.ImpactNormal;
-	
-		//포탈 위치 및 회전 설정4
+		if (hitsuccess)
+		{
+			PortalLoc = Hit.ImpactPoint;
+			PortalForwardVector = Hit.ImpactNormal;
+			
+			//포탈 위치 및 회전 설정4
 
-		//X
-		SetPortalLocAndRot(PortalForwardVector.X,1.f,
-		PortalRot,FRotator(0,0,0),
-		PortalLoc, FVector(1,0,0));
+			//X
+			SetPortalLocAndRot(PortalForwardVector.X,1.f,
+			PortalRot,FRotator(0,0,0),
+			PortalLoc, FVector(1,0,0));
 
-		SetPortalLocAndRot(PortalForwardVector.X,-1.f,
-		PortalRot,FRotator(0,0,-180),
-		PortalLoc, FVector(-1,0,0));
+			SetPortalLocAndRot(PortalForwardVector.X,-1.f,
+			PortalRot,FRotator(0,-180, 0),
+			PortalLoc, FVector(-1,0,0));
 
-		
-		// Y
-		SetPortalLocAndRot(PortalForwardVector.Y,1.f,
-		PortalRot,FRotator(0,0,90),
-		PortalLoc, FVector(0,1,0));
+			
+			// Y
+			SetPortalLocAndRot(PortalForwardVector.Y,1.f,
+			PortalRot,FRotator(0,90,0),
+			PortalLoc, FVector(0,1,0));
 
-		SetPortalLocAndRot(PortalForwardVector.Y,-1.f,
-		PortalRot,FRotator(0,0,-90),
-		PortalLoc, FVector(0,-1,0));
+			SetPortalLocAndRot(PortalForwardVector.Y,-1.f,
+			PortalRot,FRotator(0,-90,0),
+			PortalLoc, FVector(0,-1,0));
 
-		
-		//Z
-		SetPortalLocAndRot(PortalForwardVector.Z,1.f,
-		PortalRot,FRotator(0,90,0),
-		PortalLoc, FVector(0,0,1));
+			
+			//Z
+			SetPortalLocAndRot(PortalForwardVector.Z,1.f,
+			PortalRot,FRotator(90,0,0),
+			PortalLoc, FVector(0,0,1));
 
-		SetPortalLocAndRot(PortalForwardVector.Z,-1.f,
-		PortalRot,FRotator(0,-90,0),
-		PortalLoc, FVector(0,0,-1));
-		
-		// 기존 포탈 삭제
-		DestroyPortal(PortalClass);
-		
-		// 새로운 포탈 스폰
-		PortalActor = GetWorld()->SpawnActor<APortalActor>(PortalClass, PortalLoc, PortalRot);
-	 
+			SetPortalLocAndRot(PortalForwardVector.Z,-1.f,
+			PortalRot,FRotator(-90,0,0),
+			PortalLoc, FVector(0,0,-1));
+			
+			// 기존 포탈 삭제
+			DestroyPortal(PortalClass);
+			
+			// 새로운 포탈 스폰
+			PortalActor = GetWorld()->SpawnActor<APortalActor>(PortalClass, PortalLoc, PortalRot);
+		 
 		// 크기 애니메이션 넣기 (나중에..)
+
+		}
+		
 		
 		
 		
