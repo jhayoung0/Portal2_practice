@@ -75,9 +75,6 @@ public:
 	class UInputAction* IA_Grab;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UInputMappingContext* IMC_Shoot;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> PortalBulletBlue;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -126,9 +123,10 @@ public:
 	
 	UFUNCTION()
 	void OnMoveFinished(bool color, FVector EndImpactPoint);
+
+	UFUNCTION()
+	void SetupInput(UEnhancedInputComponent* EIC);
 	
-	
-	void TryBindInput();
 
 	// 점프대 올라가면 GRAB 자동 해제
 	UFUNCTION(BlueprintCallable)

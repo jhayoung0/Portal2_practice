@@ -92,8 +92,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APortalActor* PortalActor;
 	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    class UInputMappingContext* IMC_Shoot; 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputMappingContext* IMC_MouseLook;
 	
 	// function
+
+	
 	UFUNCTION(BlueprintCallable, Category="Portal")
 	void SpawnPortal(TSubclassOf<APortalActor> PortalClass, FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
 	

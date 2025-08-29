@@ -7,6 +7,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Engine/LocalPlayer.h"
+#include "InputAction.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -41,6 +45,24 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (ULocalPlayer* LP = PC->GetLocalPlayer())
+		{
+			class UEnhancedInputLocalPlayerSubsystem* Inputsys;
+			
+			Inputsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LP);
+			if (Inputsys)
+			{
+				Inputsys->AddMappingContext(IMC_Shoot, 0);
+				Inputsys->AddMappingContext(IMC_MouseLook, 1);
+				
+			}
+		}
+	}
+
+	
 	
 }
 
@@ -55,8 +77,11 @@ void AFirstPersonCharacter::Tick(float DeltaTime)
 void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 }
+
+	
+
 
 
 void AFirstPersonCharacter::DestroyPortal(TSubclassOf<APortalActor> Portal)

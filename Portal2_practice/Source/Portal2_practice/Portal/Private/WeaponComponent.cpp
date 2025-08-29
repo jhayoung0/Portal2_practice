@@ -44,15 +44,7 @@ void UWeaponComponent::BeginPlay()
 
 	//player의 has rifle을 true로 set
 	player->HasRifle = true;
-
-
-	TryBindInput();
-
-	if (!bInputBound) // 초기화 순서 대비
-	{
-		FTimerHandle T;
-		GetWorld()->GetTimerManager().SetTimer(T, this, &UWeaponComponent::TryBindInput, 0.0f, false, 0.0f);
-	}
+	
 
 }
 
@@ -193,9 +185,8 @@ void UWeaponComponent::FlyBullet(FVector start, bool color, FVector EndImpactPoi
 		GetComponentRotation(), false, false, 0.1f,
 		false, EMoveComponentAction::Move, LatentInfo);
 
+	// 총알 삭제
 	Bullet->Destroy();
-	
-	
 }
 
 void UWeaponComponent::OnMoveFinished(bool color, FVector EndImpactPoint)
@@ -204,54 +195,36 @@ void UWeaponComponent::OnMoveFinished(bool color, FVector EndImpactPoint)
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),particle, EndImpactPoint);
 }
 
-void UWeaponComponent::TryBindInput()
+void UWeaponComponent::SetupInput(UEnhancedInputComponent* EIC)
 {
-	// Input 등록
-	if (bInputBound) return;
+
+	if (!EIC) { UE_LOG(LogTemp, Error, TEXT("EIC is NULL")); return; }
+	if (!IA_ShootL) { UE_LOG(LogTemp, Error, TEXT("IA_Shoot is NULL (assign it in the WeaponComponent)")); return; }
+
 	
 
-
-
-	// 1) IMC 추가: LocalPlayer Subsystem에 등록
-	if (IMC_Shoot)
+	if (IA_ShootL)
 	{
-		if (ULocalPlayer* LP = PC->GetLocalPlayer())
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LP))
-			{
-				Subsys->AddMappingContext(IMC_Shoot,  -10);
-			}
-		}
+		EIC->BindAction(IA_ShootL, ETriggerEvent::Triggered, this, &UWeaponComponent::OnShootL);
 	}
-
-	// 2) 액션 바인딩: Owner의 InputComponent에서 EnhancedInputComponent로 캐스팅
-	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(OwnerPawn->InputComponent))
+	if (IA_ShootR)
 	{
-		if (IA_ShootL)
-		{
-			EIC->BindAction(IA_ShootL, ETriggerEvent::Triggered, this, &UWeaponComponent::OnShootL);
-			bInputBound = true;
-		}
-		if (IA_ShootR)
-		{
-			EIC->BindAction(IA_ShootR, ETriggerEvent::Triggered, this, &UWeaponComponent::OnShootR);
-			bInputBound = true;
-		}
-		if (IA_Grab)
-		{
-			EIC->BindAction(IA_Grab, ETriggerEvent::Started, this, &UWeaponComponent::OnGrab);
-			bInputBound = true;
-		}
-		
+		EIC->BindAction(IA_ShootR, ETriggerEvent::Triggered, this, &UWeaponComponent::OnShootR);
 	}
+	if (IA_Grab)
+	{
+		EIC->BindAction(IA_Grab, ETriggerEvent::Started, this, &UWeaponComponent::OnGrab);
+	}
+	
 }
+
 
 void UWeaponComponent::ReleaseObjectCube()
 {
 	if (IsValid(GrabbedObject))
 	{
 		
-		GrabbedObject->GetOwner()
+		//GrabbedObject->GetOwner();
 	}
 }
 
