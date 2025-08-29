@@ -31,18 +31,23 @@ void AJumpPad::BeginPlay()
 	this->TriggerDelay = Duration;
 	this->ElapsedTime = 0;
 
-	SwitchButton = FComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
+	// SwitchButton = FComponentHelper::FindComponentByNameRecursive<UStaticMeshComponent>(this, SWITCH_BUTTON_PATH);
 	SwitchCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, SWITCH_COLLISION_PATH);
 
-	if (SwitchButton != nullptr)
+	if ( IsValid(SwitchCollision))
 	{
-		MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
-		OriginVector = SwitchButton->GetRelativeLocation();
 		SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
-
-		MaterialButton->SetVectorParameterValue(ColorParam, WarningColor);
-		SwitchButton->SetRelativeLocation(OriginVector);
 	}
+	
+	// if (SwitchButton != nullptr)
+	// {
+		// MaterialButton = SwitchButton->CreateDynamicMaterialInstance(0);
+		// OriginVector = SwitchButton->GetRelativeLocation();
+		// SwitchCollision->OnComponentBeginOverlap.AddDynamic(this, &AJumpPad::OnBeginOverlap);
+
+		// MaterialButton->SetVectorParameterValue(ColorParam, WarningColor);
+		// SwitchButton->SetRelativeLocation(OriginVector);
+	// }
 }
 
 void AJumpPad::Tick(float DeltaTime)
@@ -54,21 +59,21 @@ void AJumpPad::Tick(float DeltaTime)
 	auto AlphaValue = LerpAlpha();
 	// ULOG(Warning, "LerpAlpha : %f", LerpAlpha() );
 
-	{
-		const auto Color_A = FMaterialHelper::GetVectorParameterValueSafe(MaterialButton, ColorParam);
-		const auto Color_B = WarningColor;
-		const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
+	// {
+	// 	const auto Color_A = FMaterialHelper::GetVectorParameterValueSafe(MaterialButton, ColorParam);
+	// 	const auto Color_B = WarningColor;
+	// 	const auto Color_Result = UKismetMathLibrary::LinearColorLerpUsingHSV(Color_A, Color_B, AlphaValue);
+	//
+	// 	MaterialButton->SetVectorParameterValue(ColorParam, Color_Result);
+	// }
 
-		MaterialButton->SetVectorParameterValue(ColorParam, Color_Result);
-	}
-
-	{
-		const auto Vector_A = SwitchButton->GetRelativeLocation();
-		const auto Vector_B = OriginVector;
-		const auto Vector_Result = UKismetMathLibrary::VLerp(Vector_A, Vector_B, AlphaValue);
-
-		SwitchButton->SetRelativeLocation(Vector_Result);
-	}
+	// {
+	// 	const auto Vector_A = SwitchButton->GetRelativeLocation();
+	// 	const auto Vector_B = OriginVector;
+	// 	const auto Vector_Result = UKismetMathLibrary::VLerp(Vector_A, Vector_B, AlphaValue);
+	//
+	// 	SwitchButton->SetRelativeLocation(Vector_Result);
+	// }
 
 	if (!bIsJumping || !InOtherActor)
 		return;
@@ -136,8 +141,8 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 {
 	const FVector FinalVelocity = [&]()
 	{
-		if (bUseForcChracterVelocity) return OutCharacterForceVelocity;
-		if (bUseForceCubeVelocity)    return OutCubeForceVelocity;
+		// if (bUseForcChracterVelocity) return OutCharacterForceVelocity;
+		// if (bUseForceCubeVelocity)    return OutCubeForceVelocity;
 		return InVelocity; // 계산된 근사 속도
 	}();
 	
@@ -225,8 +230,8 @@ void AJumpPad::OnBeginOverlap(
 
 	SetActorTickEnabled(true);
 
-	MaterialButton->SetVectorParameterValue(ColorParam, IdleColor);
-	SwitchButton->SetRelativeLocation(EndVector);
+	// MaterialButton->SetVectorParameterValue(ColorParam, IdleColor);
+	// SwitchButton->SetRelativeLocation(EndVector);
 	
 	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
 	{

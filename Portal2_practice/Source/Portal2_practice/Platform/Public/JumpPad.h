@@ -39,14 +39,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
 	float TriggerDelay = 3.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
-	FName ColorParam = FName("Color");
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
-	FLinearColor IdleColor = FLinearColor::White;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
-	FLinearColor WarningColor = FLinearColor::Red;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
+	// FName ColorParam = FName("Color");
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
+	// FLinearColor IdleColor = FLinearColor::White;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
+	// FLinearColor WarningColor = FLinearColor::Red;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Switch")
 	FVector OriginVector;
@@ -54,10 +54,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Switch")
 	FVector EndVector;
 
-	UPROPERTY()
-	class UStaticMeshComponent* SwitchButton;
-	UPROPERTY()
-	class UMaterialInstanceDynamic* MaterialButton;
+	// UPROPERTY()
+	// class UStaticMeshComponent* SwitchButton;
+	// UPROPERTY()
+	// class UMaterialInstanceDynamic* MaterialButton;
 	UPROPERTY()
 	class UPrimitiveComponent* SwitchCollision;
 	UPROPERTY()
@@ -73,14 +73,14 @@ public:
 	UPROPERTY(EditAnywhere, Category="JumpPad")
 	bool  bShowLine = false;
 
-	UPROPERTY(EditAnywhere, Category="JumpPad")
-	bool  bUseForcChracterVelocity  = false;
-	UPROPERTY(EditAnywhere, Category="JumpPad")
-	bool  bUseForceCubeVelocity  = false;
-	UPROPERTY(EditAnywhere, Category="JumpPad")
-	FVector OutCharacterForceVelocity = FVector(0,0,0);
-	UPROPERTY(EditAnywhere, Category="JumpPad")
-	FVector OutCubeForceVelocity = FVector(0,0,0);
+	// UPROPERTY(EditAnywhere, Category="JumpPad")
+	// bool  bUseForcChracterVelocity  = false;
+	// UPROPERTY(EditAnywhere, Category="JumpPad")
+	// bool  bUseForceCubeVelocity  = false;
+	// UPROPERTY(EditAnywhere, Category="JumpPad")
+	// FVector OutCharacterForceVelocity = FVector(0,0,0);
+	// UPROPERTY(EditAnywhere, Category="JumpPad")
+	// FVector OutCubeForceVelocity = FVector(0,0,0);
 
 private:
 	FVector StartPos;         // 시작 좌표
