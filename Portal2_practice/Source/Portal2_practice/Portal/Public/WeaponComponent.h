@@ -38,24 +38,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AFirstPersonCharacter* player;
 
-	// 머티리얼 변수
-	// BP에서 원하는 머티리얼(asset) 직접 지정
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
-	TObjectPtr<UMaterialInterface> Bluecore = nullptr;
-
-	// GC로 안 날아가게 MID는 UPROPERTY로 보관
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> Bluecore_DynMat = nullptr;
-
-
-	// BP에서 원하는 머티리얼(asset) 직접 지정
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
-	TObjectPtr<UMaterialInterface> Orangecore = nullptr;
-
-	// GC로 안 날아가게 MID는 UPROPERTY로 보관
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> Orangecore_DynMat = nullptr;
-	
 	
 	// 인풋 변수
 	UPROPERTY(EditAnywhere)
@@ -88,13 +70,13 @@ public:
 	TSubclassOf<class APortalActor> Portal2class;
 
 
-
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* VFX_Blue;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem*  VFX_Orange;
+	
 
 	bool bInputBound = false;
 	
@@ -127,8 +109,6 @@ public:
 	void FlyBullet(FVector start, bool color,
 		FVector EndImpactPoint, FVector EndBullet);
 	
-	UFUNCTION()
-	void OnMoveFinished(bool color, FVector EndImpactPoint);
 
 	UFUNCTION()
 	void SetupInput(UEnhancedInputComponent* EIC);

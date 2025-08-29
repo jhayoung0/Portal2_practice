@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/TimelineComponent.h"
 #include "FirstPersonCharacter.generated.h"
+
+class APortalActor;
 
 UCLASS()
 class PORTAL2_PRACTICE_API AFirstPersonCharacter : public ACharacter
@@ -26,6 +29,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+
+
+	// 플레이어에 붙일 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* FirstPersonCamera;
 	
@@ -42,6 +48,8 @@ public:
 	class UWeaponComponent* WeaponCP = nullptr;         // 실제 인스턴스
 
 
+
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	bool HasRifle;    
 	
@@ -64,7 +72,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
 	FVector PortalForwardVector;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal1ForwardVector;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal2ForwardVector;
+
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
 	FRotator PortalRot;
@@ -76,6 +91,26 @@ public:
 	UAnimMontage* Pistol_fire_montage;
 	
 
+
+	// 머티리얼 변수
+	// BP에서 원하는 머티리얼(asset) 직접 지정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
+	TObjectPtr<UMaterialInterface> Bluecore = nullptr;
+
+	// GC로 안 날아가게 MID는 UPROPERTY로 보관
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> Bluecore_DynMat = nullptr;
+
+
+	// BP에서 원하는 머티리얼(asset) 직접 지정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
+	TObjectPtr<UMaterialInterface> Orangecore = nullptr;
+
+	// GC로 안 날아가게 MID는 UPROPERTY로 보관
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> Orangecore_DynMat = nullptr;
+
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APortalActor* PortalActor;
 	
@@ -88,10 +123,13 @@ public:
 	class UInputMappingContext* IMC_MouseLook;
 	
 	// function
-
+	// 포탈 scale 설정을 위한 timeline 설정
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnScaleUpdate(APortalActor* TargetPortal);
+	
 	
 	UFUNCTION(BlueprintCallable, Category="Portal")
-	void SpawnPortal(TSubclassOf<APortalActor> PortalClass); // , FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
+	void SpawnPortal(TSubclassOf<APortalActor> PortalClass, bool color); // , FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
 	
 
 	UFUNCTION(BlueprintCallable, Category="Portal")

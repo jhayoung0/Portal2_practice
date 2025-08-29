@@ -2,7 +2,7 @@
 
 
 #include "FirstPersonCharacter.h"
-
+#include "Components/SkeletalMeshComponent.h"
 #include "AElevator.h"
 #include "PortalActor.h"
 #include "WeaponComponent.h"
@@ -11,11 +11,18 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/KismetSystemlibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "InputAction.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "AimUI.h"
+#include "Components/TimelineComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
+
+
 
 #define INTERACT_COLLISION_PATH		TEXT("InteractCollision")
 
@@ -41,7 +48,19 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	ArrowComp = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComp"));
 	ArrowComp->SetupAttachment(FirstPersonCamera);
 	ArrowComp->SetRelativeLocation(FVector(0.f,0.f,-30.f));
+	
+
+	
 }
+
+
+// Called to bind functionality to input
+void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+}
+
 
 // Called when the game starts or when spawned
 void AFirstPersonCharacter::BeginPlay()
@@ -78,29 +97,24 @@ void AFirstPersonCharacter::BeginPlay()
 			}
 		}
 	}
+
+
+
+	
 }
 
 // Called every frame
 void AFirstPersonCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 }
 
-	
 
 
 
 void AFirstPersonCharacter::DestroyPortal(TSubclassOf<APortalActor> Portal)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Destroy Portal"));
 	APortalActor* FoundedPortal = Cast<APortalActor>
 	(UGameplayStatics::GetActorOfClass(GetWorld(), Portal));
 
@@ -117,22 +131,10 @@ void AFirstPersonCharacter::SetPortalLocAndRot(float forward_float, float compar
 	if (FMath::IsNearlyEqual(forward_float, comparison_value, T))
 	{
 		IsNearyEqual = true;
-
-		UE_LOG(LogTemp, Warning, TEXT("true"));
-		
-		UE_LOG(LogTemp, Warning, TEXT("forward_float = %f"), forward_float);
-		UE_LOG(LogTemp, Warning, TEXT("comparison_value = %f"), comparison_value);
-
-		
 	}
 	else
 	{
 		IsNearyEqual = false;
-		UE_LOG(LogTemp, Warning, TEXT("false"));
-		UE_LOG(LogTemp, Warning, TEXT("forward_float = %f"), forward_float);
-		UE_LOG(LogTemp, Warning, TEXT("comparison_value = %f"), comparison_value);
-		
-		
 	}
 
 	// 포탈 전방 벡터에 따라 회전과 위치 설정
@@ -140,20 +142,16 @@ void AFirstPersonCharacter::SetPortalLocAndRot(float forward_float, float compar
 	{
 		PortalRot = Rot;
 		PortalLoc += Offset;
-
-		
-		
 		return;
 	}
 	
 }
 
 
+
 // 포탈 스폰 함수
-void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass) // ,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
+void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass, bool color) // ,FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Spawn Portal"));
-	
 	if (WeaponCP->CanShoot)
 	{
 
@@ -175,7 +173,7 @@ void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass) /
 			,ObjectTypes
 			,false
 			,TArray<AActor*>()
-			,EDrawDebugTrace::Type::ForDuration
+			,EDrawDebugTrace::Type::None
 			,Hit
 			,true);
 
@@ -184,7 +182,7 @@ void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass) /
 			PortalLoc = Hit.ImpactPoint;
 			PortalForwardVector = Hit.ImpactNormal;
 			
-			//포탈 위치 및 회전 설정4
+			//포탈 위치 및 회전 설정
 
 			//X
 			SetPortalLocAndRot(PortalForwardVector.X,1.f,
@@ -220,13 +218,36 @@ void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass) /
 			
 			// 새로운 포탈 스폰
 			PortalActor = GetWorld()->SpawnActor<APortalActor>(PortalClass, PortalLoc, PortalRot);
-		 
-		// 크기 애니메이션 넣기 (나중에..)
+			
+			// 포탈 크기 애니메이션 (bp에서 구현)
+			OnScaleUpdate(PortalActor);
 
+			// 포탈건 코어 색 변경
+			TObjectPtr<UMaterialInterface> core = color? Bluecore: Orangecore;
+			TObjectPtr<UMaterialInstanceDynamic> core_DynMat = color? Bluecore_DynMat : Orangecore_DynMat;
+			
+			core_DynMat = WeaponCP-> CreateAndSetMaterialInstanceDynamicFromMaterial(1, core);
+	
+			// (1) WDGAim 찾기
+			TArray<UUserWidget*> Found;
+			UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Found, UAimUI::StaticClass(), /*TopLevelOnly*/ true);
+
+			// (2) 첫 번째(인덱스 0)만 사용
+			if (Found.Num() > 0)
+			{
+				if (UAimUI* Aim = Cast<UAimUI>(Found[0]))
+				{
+					if (color)
+					{
+						Aim->OnBlueFired();
+					}
+					else
+					{
+						Aim->OnOrangeFired();
+					}
+					  
+				}
+			}
 		}
-		
-		
-		
-		
 	}
 }

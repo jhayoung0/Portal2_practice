@@ -11,14 +11,13 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "InputActionValue.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemlibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
-#include "AimUI.h"
 #include "PortalCube.h"
 #include "PortalJump.generated.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
 
 
 UWeaponComponent::UWeaponComponent()
@@ -68,31 +67,14 @@ void UWeaponComponent::OnShootL(const FInputActionValue& value)
 	UE_LOG(LogTemp, Warning, TEXT("ShootL"));
 
 	player->NewlyCreatedPortal1 = false;
-	player->SpawnPortal(Portal1class);
-	
-	Orangecore_DynMat = CreateAndSetMaterialInstanceDynamicFromMaterial(1, Bluecore);
+	player->SpawnPortal(Portal1class, true);
 
-    if (!CamManager)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("cammanager none"));
-	}
+
 	if (CamManager)
 	{
 		OnLinetrace(true);
 	}
-
-	// (1) WDGAim 찾기
-	TArray<UUserWidget*> Found;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Found, UAimUI::StaticClass(), /*TopLevelOnly*/ true);
-
-	// (2) 첫 번째(인덱스 0)만 사용
-	if (Found.Num() > 0)
-	{
-		if (UAimUI* Aim = Cast<UAimUI>(Found[0]))
-		{
-			Aim->OnBlueFired();  
-		}
-	}
+	
 	
 
 }
@@ -102,28 +84,14 @@ void UWeaponComponent::OnShootR(const FInputActionValue& value)
 	UE_LOG(LogTemp, Warning, TEXT("ShootR"));
 	
 	player->NewlyCreatedPortal2 = false;
-	player->SpawnPortal(Portal2class);
-	
-	Bluecore_DynMat = CreateAndSetMaterialInstanceDynamicFromMaterial(1, Orangecore);
+	player->SpawnPortal(Portal2class, false);
 
 	
 	if (CamManager)
 	{
 		OnLinetrace(false);
 	}
-
-	// (1) WDGAim 찾기
-	TArray<UUserWidget*> Found;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Found, UAimUI::StaticClass(), /*TopLevelOnly*/ true);
-
-	// (2) 첫 번째(인덱스 0)만 사용
-	if (Found.Num() > 0)
-	{
-		if (UAimUI* Aim = Cast<UAimUI>(Found[0]))
-		{
-			Aim->OnOrangeFired();  
-		}
-	}
+	
 	
 	
 }
@@ -209,6 +177,12 @@ void UWeaponComponent::OnLinetrace(bool color)
 
 	// 총알 날아가는거 설정
 	FlyBullet(Hit.TraceStart, color, Hit.ImpactPoint, Hit.TraceEnd);
+
+	//UE_LOG(LogTemp, Warning, TEXT("%d", ImpactPoint));
+	// 파티클 스폰 (포탈 스폰되지 않더라도 생기게)
+	UParticleSystem* particle = color? VFX_Blue :  VFX_Orange;
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particle,  Hit.TraceEnd);
+	
 	
 }
 
@@ -219,8 +193,6 @@ AActor* UWeaponComponent::SpawnBullet(bool color)
 
 	
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(BulletClass,FVector(0), FRotator(0));
-
-	if (Spawned) {UE_LOG(LogTemp, Warning, TEXT("Spawned"))};
 	
 	return Spawned;
 	
@@ -238,26 +210,13 @@ void UWeaponComponent::FlyBullet(FVector start, bool color, FVector EndImpactPoi
 	LatentInfo.UUID               = __LINE__;                 // 고유 ID (간단히 라인 넘버 쓰기도 함)
 	
 	UKismetSystemLibrary::MoveComponentTo(bullet->GetRootComponent(), EndBullet,
-		GetComponentRotation(), false, false, 0.1f,
+		GetComponentRotation(), false, false, 0.2f,
 		false, EMoveComponentAction::Move, LatentInfo);
 
-	bullet->SetLifeSpan(0.12f);
+	bullet->SetLifeSpan(0.22f);
 
 }
 
-void UWeaponComponent::OnMoveFinished(bool color, FVector EndImpactPoint)
-{
-	UE_LOG(LogTemp, Warning, TEXT("[MoveComponentTo] OnMoveFinished fired"));
-	
-	UParticleSystem* particle = color? VFX_Blue :  VFX_Orange;
-
-
-	//if (hit)
-	//{
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particle, EndImpactPoint);
-	//}
-	
-}
 
 void UWeaponComponent::SetupInput(UEnhancedInputComponent* EIC)
 {
