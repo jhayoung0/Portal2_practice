@@ -9,9 +9,17 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class PORTAL2_PRACTICE_API UAimUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+
+public:
+		
+	UFUNCTION(BlueprintImplementableEvent, Category= "Portal")
+	void OnOrangeFired();
+
+	UFUNCTION(BlueprintImplementableEvent, Category= "Portal")
+	void OnBlueFired();
 };

@@ -5,6 +5,7 @@
 #include "FirstPersonCharacter.h"
 #include "WeaponComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "EnhancedInputComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
@@ -103,6 +104,39 @@ void APickupRifle::OnSphereCompOverlap(UPrimitiveComponent* OverlappedComponent,
 		// 플레이어 변수에 셋팅
 		Player->WeaponCP = NewComp;
 
+		// 입력 바인딩
+		if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
+		{
+			if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PC->InputComponent))
+			{
+				NewComp->SetupInput(EIC);
+				UE_LOG(LogTemp, Warning, TEXT("WeaponComponent->SetupInput bound immediately"));
+			}
+			else
+			{
+				// 아직 InputComponent가 준비 안 됐을 수 있으니 다음 틱에 재시도
+				FTimerHandle Timer;
+				Player->GetWorldTimerManager().SetTimer(Timer, FTimerDelegate::CreateWeakLambda(NewComp, [NewComp, PC]()
+				{
+					if (!IsValid(NewComp) || !IsValid(PC)) return;
+					if (UEnhancedInputComponent* EIC2 = Cast<UEnhancedInputComponent>(PC->InputComponent))
+					{
+						NewComp->SetupInput(EIC2);
+						UE_LOG(LogTemp, Warning, TEXT("WeaponComponent->SetupInput bound (deferred)"));
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("EnhancedInputComponent still not ready"));
+					}
+				}), 0.f, false); // 다음 프레임
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerController not ready; cannot bind input"));
+		}
+
+		
 		// AIM UI 생성 -> add to viewport
 		APlayerController* pc = Cast<APlayerController>(GetWorld()-> GetFirstPlayerController());
 		
