@@ -28,6 +28,10 @@ public:
 	void ReturnPool();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Cube")
 	void StartDisolve();
+	UFUNCTION(Category="Cube")
+	void Activate_Duplicate(USceneComponent* EntryDoorComponent, USceneComponent* ExitDoorComponent);
+	UFUNCTION(Category="Cube")
+	void Deactivate_Duplicate();
 	
 private:
 	void UpdateDissolve();

@@ -100,6 +100,12 @@ public:
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	APlayerCameraManager* CamManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector AmmoSocket_loc  = GetSocketLocation(FName("AmmoSocket"));;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator AmmoSocket_Rot;
+
 	
 	//Function
 	UFUNCTION()

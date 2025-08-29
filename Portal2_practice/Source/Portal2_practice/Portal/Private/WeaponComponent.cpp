@@ -15,7 +15,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "AimUI.h"
+#include "PortalCube.h"
+#include "PortalJump.generated.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 UWeaponComponent::UWeaponComponent()
@@ -130,12 +133,61 @@ void UWeaponComponent::OnShootR(const FInputActionValue& value)
 void UWeaponComponent::OnGrab(const FInputActionValue& value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab"));
+
+	FVector Offset  = FVector(100.f, -20.f, -10.f);
+	FRotator CamRot = CamManager->GetCameraRotation();
+	
+	FVector start = AmmoSocket_loc + UKismetMathLibrary::GreaterGreater_VectorRotator(Offset, CamRot);
+	
+	if (IsValid(GrabbedObject))
+	{
+
+		
+	}
+	else
+	{
+		// LineTrace
+		FHitResult Hit;
+
+		FVector grabend = AmmoSocket_loc +
+			UKismetMathLibrary::GetForwardVector(AmmoSocket_Rot) * 500.f;
+		
+		bool bHit = UKismetSystemLibrary::LineTraceSingle(
+			GetWorld(),
+			AmmoSocket_loc,
+			grabend,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			false,
+			TArray<AActor*>(),        // 비움
+			EDrawDebugTrace::ForDuration,    
+			Hit,
+			true                      // Ignore Self
+		);
+
+		if (bHit){
+			if (Hit.Component->IsSimulatingPhysics())
+			{
+				Hit.Component->SetSimulatePhysics(false);
+				//AttachToComponent(this, Hit.GetActor(),
+					//FAttachmentTransformRules::KeepWorldTransform, FName("AmmoSocket"));
+					
+				
+				
+//(USceneComponent* Parent, FName SocketName, EAttachmentRule LocationRule, EAttachmentRule RotationRule, EAttachmentRule ScaleRule, bool bWeldSimulatedBodies);
+
+			}
+			
+			
+			
+		}
+		
+	}
+
+	
 }
 
 void UWeaponComponent::OnLinetrace(bool color)
 {
-	FVector AmmoSocket_loc = GetSocketLocation(FName("AmmoSocket"));
-	
 	FVector end = AmmoSocket_loc + (CamManager->GetActorForwardVector() * 500.f);
 
 	// LineTrace
@@ -224,7 +276,29 @@ void UWeaponComponent::ReleaseObjectCube()
 	if (IsValid(GrabbedObject))
 	{
 		
-		//GrabbedObject->GetOwner();
+		Cast<APortalCube>(GrabbedObject->GetOwner())
+		->Deactivate_Duplicate();
+
+
+		FLatentActionInfo LatentInfo;
+		LatentInfo.CallbackTarget = this;                   // 딜레이 끝난 뒤 실행될 객체
+		LatentInfo.ExecutionFunction = FName("OnDelayDone");// 실행할 함수 이름
+		LatentInfo.Linkage = 0;
+		LatentInfo.UUID = __LINE__; 
+
+		UKismetSystemLibrary::Delay(this, 0.2f, LatentInfo);
+
+		if (IsValid(GrabbedObject))
+		{
+			GrabbedObject->SetSimulatePhysics(true);
+
+			GrabbedObject = nullptr;
+			
+			CanShoot = true; 
+
+		}
+		
+		
 	}
 }
 
