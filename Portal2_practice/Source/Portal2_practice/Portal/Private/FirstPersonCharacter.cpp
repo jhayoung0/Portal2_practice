@@ -2,8 +2,11 @@
 
 
 #include "FirstPersonCharacter.h"
+
+#include "AElevator.h"
 #include "PortalActor.h"
 #include "WeaponComponent.h"
+#include "Shared/FComponentHelper.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
@@ -14,6 +17,7 @@
 #include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#define INTERACT_COLLISION_PATH		TEXT("InteractCollision")
 
 // Sets default values
 AFirstPersonCharacter::AFirstPersonCharacter()
@@ -37,8 +41,6 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	ArrowComp = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComp"));
 	ArrowComp->SetupAttachment(FirstPersonCamera);
 	ArrowComp->SetRelativeLocation(FVector(0.f,0.f,-30.f));
-	
-	
 }
 
 // Called when the game starts or when spawned
@@ -50,20 +52,32 @@ void AFirstPersonCharacter::BeginPlay()
 	{
 		if (ULocalPlayer* LP = PC->GetLocalPlayer())
 		{
-			class UEnhancedInputLocalPlayerSubsystem* Inputsys;
-			
-			Inputsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LP);
-			if (Inputsys)
+			auto Inputsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LP);
+			if ( IsValid(Inputsys) )
 			{
 				Inputsys->AddMappingContext(IMC_Shoot, 0);
 				Inputsys->AddMappingContext(IMC_MouseLook, 1);
-				
 			}
 		}
 	}
 
-	
-	
+	auto InteractCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, INTERACT_COLLISION_PATH);
+	if ( IsValid(InteractCollision))
+	{
+		TArray<AActor*> OverlappingActors;
+		InteractCollision->GetOverlappingActors(OverlappingActors);
+
+		for (AActor* Actor : OverlappingActors)
+		{
+			// 특정 타입만 필터링
+			auto Elevator = Cast<AElevator>(Actor);
+			if ( IsValid(Elevator))
+			{
+				Elevator->SetMoveState(true);
+				break;
+			}
+		}
+	}
 }
 
 // Called every frame
