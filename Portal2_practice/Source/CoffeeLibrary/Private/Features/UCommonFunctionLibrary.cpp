@@ -1,6 +1,8 @@
 ﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved.
 
 #include "Features/UCommonFunctionLibrary.h"
+
+#include "Kismet/KismetMathLibrary.h"
 #include "Misc/DateTime.h"
 //
 // void UCoffeeCommonUtil::TestULog()
@@ -99,4 +101,12 @@ UMaterialInstanceDynamic* UCommonFunctionLibrary::GetOrCreateMID(
 		Target->SetMaterial(ElementIndex, NewMID);
 
 	return NewMID;
+}
+
+float UCommonFunctionLibrary::GetDistance(AActor* A, AActor* B)
+{
+	if ( !IsValid(A) || !IsValid(B) )
+		return 0;
+
+	return UKismetMathLibrary::Vector_Distance( A->GetActorLocation(), B->GetActorLocation() );
 }
