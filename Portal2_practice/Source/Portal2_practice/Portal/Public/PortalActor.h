@@ -23,4 +23,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+	// 상대 포탈 선언
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<APortalActor> ExitClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APortalActor* Exit;
+	
+
+	
 };
