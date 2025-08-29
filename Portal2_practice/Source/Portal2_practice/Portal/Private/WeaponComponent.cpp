@@ -91,7 +91,8 @@ void UWeaponComponent::OnShootR(const FInputActionValue& value)
 	{
 		OnLinetrace(false);
 	}
-	
+
+
 	
 	
 }
@@ -244,6 +245,8 @@ void UWeaponComponent::SetupInput(UEnhancedInputComponent* EIC)
 
 void UWeaponComponent::ReleaseObjectCube()
 {
+
+	/*
 	if (IsValid(GrabbedObject))
 	{
 		
@@ -271,6 +274,7 @@ void UWeaponComponent::ReleaseObjectCube()
 		
 		
 	}
+	*/
 }
 
 

@@ -218,10 +218,32 @@ void AFirstPersonCharacter::SpawnPortal(TSubclassOf<APortalActor> PortalClass, b
 			
 			// 새로운 포탈 스폰
 			PortalActor = GetWorld()->SpawnActor<APortalActor>(PortalClass, PortalLoc, PortalRot);
+
+			if (!IsValid(PortalActor)) return;
+
+			if (PortalActor->IsA(Portal1Class.Get()))
+			{
+				// 변수 값 저장
+				Portal1Location = PortalLoc;
+				Portal1ForwardVector = PortalForwardVector;
+				Portal1Rotation = PortalRot;
+				
+			}
+			else if (PortalActor->IsA(Portal2Class.Get()))
+			{
+				// 변수 값 저장
+				Portal2Location = PortalLoc;
+				Portal2ForwardVector = PortalForwardVector;
+				Portal2Rotation = PortalRot;
+			}
+
 			
 			// 포탈 크기 애니메이션 (bp에서 구현)
 			OnScaleUpdate(PortalActor);
 
+			
+
+			
 			// 포탈건 코어 색 변경
 			TObjectPtr<UMaterialInterface> core = color? Bluecore: Orangecore;
 			TObjectPtr<UMaterialInstanceDynamic> core_DynMat = color? Bluecore_DynMat : Orangecore_DynMat;

@@ -61,28 +61,41 @@ public:
 	bool NewlyCreatedPortal2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> Portal1Class;
+	TSubclassOf<APortalActor> Portal1Class;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> Portal2Class;
+	TSubclassOf<APortalActor> Portal2Class;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
 	FVector PortalLoc;
 	
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
 	FVector PortalForwardVector;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FRotator PortalRot;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal1Location;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
 	FVector Portal1ForwardVector;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FVector Portal2ForwardVector;
+	FRotator Portal1Rotation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal2Location;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
-	FRotator PortalRot;
+	FVector Portal2ForwardVector;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FRotator Portal2Rotation;
+
 	
 	UPROPERTY(EditAnywhere, Category="Sound")
 	USoundBase* bulletsound;

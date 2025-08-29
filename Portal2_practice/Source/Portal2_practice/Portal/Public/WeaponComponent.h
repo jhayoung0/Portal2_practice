@@ -68,8 +68,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class APortalActor> Portal2class;
-
-
+	
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* VFX_Blue;
