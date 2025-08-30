@@ -29,11 +29,19 @@ void ALevel01::InitLevel()
 	if (IsValid(PortalEventManager))
 	{
 		PortalEventManager->OnLight.AddDynamic(this, &ALevel01::OnLight);
+		PortalEventManager->OnMessage.AddDynamic(this, &ALevel01::OnMessage );
 	}
 }
 
 void ALevel01::StartGame()
 {
+	if ( IsGameStart )
+	{
+		return;
+	}
+
+	IsGameStart =  true;
+	
 	TArray<AActor*> FoundActor;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElevator::StaticClass(), FoundActor);
 	for (const auto& Actor : FoundActor)
@@ -61,8 +69,15 @@ void ALevel01::OnLight(int32 Group, bool State)
 	UPortalEventManager::Get(this)->SendDoor(GoalDoorGroup,  ActivateCount == LightGroup.Num() );
 }
 
+void ALevel01::OnMessage( FString InMsg )
+{
+	if( InMsg == StartGameMessage )
+	{
+		StartGame();
+	}
+}
+
 void ALevel01::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-

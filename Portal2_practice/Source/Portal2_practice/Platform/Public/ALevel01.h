@@ -29,7 +29,10 @@ public:
 
 	UFUNCTION()
 	void OnLight(int32 Group, bool State);
-	
+
+	UFUNCTION()
+	void OnMessage(FString InMsg);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
 	TArray<int32> LightGroup;
 
@@ -41,4 +44,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category="LEVEL01");
 	TMap<int32, bool> LightGroupState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
+	FName StartGameMessage = FName("StartGame");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
+	bool IsGameStart = false;
 };
