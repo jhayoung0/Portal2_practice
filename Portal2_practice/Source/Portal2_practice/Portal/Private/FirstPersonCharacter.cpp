@@ -80,23 +80,23 @@ void AFirstPersonCharacter::BeginPlay()
 		}
 	}
 
-	auto InteractCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, INTERACT_COLLISION_PATH);
-	if ( IsValid(InteractCollision))
-	{
-		TArray<AActor*> OverlappingActors;
-		InteractCollision->GetOverlappingActors(OverlappingActors);
-
-		for (AActor* Actor : OverlappingActors)
-		{
-			// 특정 타입만 필터링
-			auto Elevator = Cast<AElevator>(Actor);
-			if ( IsValid(Elevator))
-			{
-				Elevator->SetMoveState(true);
-				break;
-			}
-		}
-	}
+	// auto InteractCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, INTERACT_COLLISION_PATH);
+	// if ( IsValid(InteractCollision))
+	// {
+	// 	TArray<AActor*> OverlappingActors;
+	// 	InteractCollision->GetOverlappingActors(OverlappingActors);
+	//
+	// 	for (AActor* Actor : OverlappingActors)
+	// 	{
+	// 		// 특정 타입만 필터링
+	// 		auto Elevator = Cast<AElevator>(Actor);
+	// 		if ( IsValid(Elevator))
+	// 		{
+	// 			Elevator->SetMoveState(true);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 
 
