@@ -35,6 +35,27 @@ void ALevel01::InitLevel()
 				Elevator->SetMoveState(true);
 		}
 	}
+
+	auto* PortalEventManager = UPortalEventManager::Get(this);
+	if (IsValid(PortalEventManager))
+	{
+		PortalEventManager->OnLight.AddDynamic(this, &ALevel01::OnLight);
+	}
+}
+
+void ALevel01::OnLight(int32 Group, bool State)
+{
+	LightGroupState.FindOrAdd(Group) = State;
+
+	int ActivateCount = 0;
+
+	for (auto KV : LightGroupState)
+	{
+		if( KV.Value )
+			ActivateCount++;
+	}
+
+	UPortalEventManager::Get(this)->SendDoor(GoalDoorGroup,  ActivateCount == LightGroup.Num() );
 }
 
 void ALevel01::Tick(float DeltaTime)

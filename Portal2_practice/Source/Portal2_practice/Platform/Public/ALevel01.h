@@ -23,10 +23,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="LEVEL01")
 	void InitLevel();
+
+	UFUNCTION()
+	void OnLight(int32 Group, bool State);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
 	TArray<int32> LightGroup;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
 	int32 StartElevatorGroup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
+	int32 GoalDoorGroup = 1;
+	
+	UPROPERTY(VisibleAnywhere, Category="LEVEL01");
+	TMap<int32, bool> LightGroupState;
 };
