@@ -16,7 +16,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "PortalCube.h"
-#include "PortalJump.generated.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 
