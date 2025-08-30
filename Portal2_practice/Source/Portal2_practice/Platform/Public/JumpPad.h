@@ -21,6 +21,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos, const FVector& InVelocity);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="JumpPad")
+	void ActivatePad();
+	
 private:
 	void AddElapsedTime();
 	float LerpAlpha() const;

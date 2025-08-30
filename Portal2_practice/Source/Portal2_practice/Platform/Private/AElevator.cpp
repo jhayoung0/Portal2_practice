@@ -107,7 +107,7 @@ void AElevator::SetWallCollision(const bool State)
 
 void AElevator::OpenDoor_Implementation()
 {
-	ULOG(Warning, "%s: 엘리베이터 문이 닫힙니다", *GetActorNameOrLabel());
+	ULOG(Warning, "%s: 엘리베이터 문이 열립니다", *GetActorNameOrLabel());
 }
 
 void AElevator::CloseDoor_Implementation()
@@ -131,7 +131,7 @@ void AElevator::Tick(float DeltaTime)
 		this->SetActorLocation( TargetPos );
 
 		const float Distance = UCommonFunctionLibrary::GetDistance( EndPos, this );
-		if ( Distance < 0.1f )
+		if ( Distance < 5.0f )
 		{
 			this->SetMoveState(false);
 			this->MoveDone();
@@ -146,7 +146,7 @@ void AElevator::Tick(float DeltaTime)
 		this->SetActorLocation( TargetPos );
 
 		const float Distance = UCommonFunctionLibrary::GetDistance( StartPos, this );
-		if ( Distance < 0.1f )
+		if ( Distance < 5.0f )
 		{
 			this->SetMoveState(false);
 			this->MoveDone();

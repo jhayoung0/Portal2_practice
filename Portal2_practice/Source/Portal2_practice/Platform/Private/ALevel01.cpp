@@ -4,7 +4,10 @@
 
 #include "AElevator.h"
 #include "UPortalEventManager.h"
+#include "Features/UCommonFunctionLibrary.h"
+
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
 
 ALevel01::ALevel01()
 {
@@ -52,6 +55,9 @@ void ALevel01::StartGame()
 				Elevator->SetMoveState(true);
 		}
 	}
+
+	if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		UCommonFunctionLibrary::PlayLocationSound(Player, StartGameSound, 0.05f);
 }
 
 void ALevel01::OnLight(int32 Group, bool State)

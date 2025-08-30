@@ -50,4 +50,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
 	bool IsGameStart = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LEVEL01");
+	class USoundBase* StartGameSound;
 };

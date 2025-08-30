@@ -34,5 +34,8 @@ public:
 		class UPrimitiveComponent* Target,
 		int32 ElementIndex,
 		FName OptionalName = NAME_None);
+
+	UFUNCTION(BlueprintCallable, Category="CoffeeLibrary|Utilities", meta=(DefaultToSelf="Target", DisplayName="PlayCommonSound"))
+	static void PlayLocationSound(const AActor* Actor, USoundBase* Sound, const float RetriggerDelay);
 };
 

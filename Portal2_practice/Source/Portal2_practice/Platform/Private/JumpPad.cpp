@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "JumpPad.h"
+
+#include "SWarningOrErrorBox.h"
 #include "ULog.h"
 
 #include "Shared/FComponentHelper.h"
@@ -139,12 +141,7 @@ void AJumpPad::Tick(float DeltaTime)
 
 void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVector NewPos, const FVector& InVelocity)
 {
-	const FVector FinalVelocity = [&]()
-	{
-		// if (bUseForcChracterVelocity) return OutCharacterForceVelocity;
-		// if (bUseForceCubeVelocity)    return OutCubeForceVelocity;
-		return InVelocity; // 계산된 근사 속도
-	}();
+	const FVector FinalVelocity = InVelocity;
 	
 	if (ACharacter* Player = Cast<ACharacter>(InOtherActor))
 	{
@@ -180,6 +177,11 @@ void AJumpPad::RestorePhysicsOrMovement(float DeltaTime, float AlphaValue, FVect
 	}
 
 	bPhysicsRestored = true;
+}
+
+void AJumpPad::ActivatePad_Implementation()
+{
+	ULOG(Warning, "Activate Pad");
 }
 
 void AJumpPad::AddElapsedTime()
@@ -237,6 +239,8 @@ void AJumpPad::OnBeginOverlap(
 	{
 		if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
 			MoveComp->DisableMovement();
+
+		this->ActivatePad();
 	}
 	else if (UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(OtherComp))
 	{
@@ -267,6 +271,8 @@ void AJumpPad::OnBeginOverlap(
 		
 		if (MeshComp->IsSimulatingPhysics())
 			MeshComp->SetSimulatePhysics(false);
+
+		this->ActivatePad();
 	}
 
 	if (bShowLine)

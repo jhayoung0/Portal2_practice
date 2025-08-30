@@ -2,6 +2,7 @@
 
 #include "Features/UCommonFunctionLibrary.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Misc/DateTime.h"
 //
@@ -101,6 +102,32 @@ UMaterialInstanceDynamic* UCommonFunctionLibrary::GetOrCreateMID(
 		Target->SetMaterial(ElementIndex, NewMID);
 
 	return NewMID;
+}
+
+void UCommonFunctionLibrary::PlayLocationSound(const AActor* Actor, USoundBase* Sound, const float RetriggerDelay)
+{
+	if (!IsValid(Actor) || !Sound)
+		return;
+	
+	if (auto World = Actor->GetWorld())
+	{
+		if ( RetriggerDelay > 0.0f)
+		{
+			TWeakObjectPtr<const AActor> WeakActor = Actor;
+			FTimerHandle TimerHandle;
+			World->GetTimerManager().SetTimer(TimerHandle, [WeakActor, Sound]()
+			{
+				if (WeakActor.IsValid())
+				{
+					UGameplayStatics::PlaySoundAtLocation(WeakActor.Get(), Sound, WeakActor->GetActorLocation());
+				}
+			}, RetriggerDelay, false);
+		}
+		else
+		{
+			UGameplayStatics::PlaySoundAtLocation(Actor, Sound, Actor->GetActorLocation());
+		}
+	}
 }
 
 float UCommonFunctionLibrary::GetDistance(AActor* A, AActor* B)

@@ -32,6 +32,9 @@ public:
 	void Activate_Duplicate(USceneComponent* EntryDoorComponent, USceneComponent* ExitDoorComponent);
 	UFUNCTION(Category="Cube")
 	void Deactivate_Duplicate();
+
+	UFUNCTION(BlueprintNativeEvent, Category="Cube")
+	void ActivateDisolve();
 	
 private:
 	void UpdateDissolve();

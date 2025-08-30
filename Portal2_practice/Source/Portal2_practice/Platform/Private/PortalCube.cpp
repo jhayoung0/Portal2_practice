@@ -72,8 +72,13 @@ void APortalCube::StartDisolve_Implementation()
 		&APortalCube::UpdateDissolve,
 		0.02f,
 		true);
+
+	this->ActivateDisolve();
 }
 
+void APortalCube::ActivateDisolve_Implementation()
+{
+}
 
 void APortalCube::UpdateDissolve()
 {
@@ -110,4 +115,3 @@ void APortalCube::Activate_Duplicate(USceneComponent* EntryDoorComponent, UScene
 void APortalCube::Deactivate_Duplicate()
 {
 }
-
