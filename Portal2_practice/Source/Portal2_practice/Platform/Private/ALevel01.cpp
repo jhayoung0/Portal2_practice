@@ -25,6 +25,15 @@ void ALevel01::InitLevel()
 		UPortalEventManager::Get(this)->SendLight(Group, false);
 	}
 	
+	auto* PortalEventManager = UPortalEventManager::Get(this);
+	if (IsValid(PortalEventManager))
+	{
+		PortalEventManager->OnLight.AddDynamic(this, &ALevel01::OnLight);
+	}
+}
+
+void ALevel01::StartGame()
+{
 	TArray<AActor*> FoundActor;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElevator::StaticClass(), FoundActor);
 	for (const auto& Actor : FoundActor)
@@ -34,12 +43,6 @@ void ALevel01::InitLevel()
 			if ( Elevator->IsSameGroup(StartElevatorGroup) )
 				Elevator->SetMoveState(true);
 		}
-	}
-
-	auto* PortalEventManager = UPortalEventManager::Get(this);
-	if (IsValid(PortalEventManager))
-	{
-		PortalEventManager->OnLight.AddDynamic(this, &ALevel01::OnLight);
 	}
 }
 

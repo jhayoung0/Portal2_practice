@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LEVEL01")
 	void InitLevel();
 
+	UFUNCTION(BlueprintCallable, Category="LEVEL01")
+	void StartGame();
+
 	UFUNCTION()
 	void OnLight(int32 Group, bool State);
 	
