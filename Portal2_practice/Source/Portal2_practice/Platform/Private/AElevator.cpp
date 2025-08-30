@@ -31,8 +31,8 @@ void AElevator::BeginPlay()
 	this->FindWall();
 	this->FindStartEndPos();
 
-	TArray<AActor*> OverlappingActors;
-	ElevatorCollision->GetOverlappingActors(OverlappingActors);
+	// TArray<AActor*> OverlappingActors;
+	// ElevatorCollision->GetOverlappingActors(OverlappingActors);
 
 	// for (AActor* Actor : OverlappingActors)
 	// {
