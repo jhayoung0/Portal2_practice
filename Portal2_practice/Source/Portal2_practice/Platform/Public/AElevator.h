@@ -44,6 +44,12 @@ public:
 		this->SetWallCollision(MoveState);
 	}
 
+	UFUNCTION(BlueprintCallable, Category="Elevator")
+	FORCEINLINE bool IsSameGroup(int32 InGroup) const
+	{
+		return Group == InGroup;
+	}
+
 	UFUNCTION(CallInEditor, Category="Elevator", meta=(DevelopmentOnly, DisplayName="Refresh"))
 	void Refresh()
 	{

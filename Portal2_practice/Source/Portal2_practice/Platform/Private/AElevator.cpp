@@ -34,18 +34,17 @@ void AElevator::BeginPlay()
 	TArray<AActor*> OverlappingActors;
 	ElevatorCollision->GetOverlappingActors(OverlappingActors);
 
-	for (AActor* Actor : OverlappingActors)
-	{
-		// 특정 타입만 필터링
-		auto Player = Cast<AFirstPersonCharacter>(Actor);
-		if ( IsValid(Player))
-		{
-			ULOG(Warning, "ELEVATOR AUTO MOVE");
-			this->SetMoveState(true);
-			break;
-		}
-	}
-	
+	// for (AActor* Actor : OverlappingActors)
+	// {
+	// 	// 특정 타입만 필터링
+	// 	auto Player = Cast<AFirstPersonCharacter>(Actor);
+	// 	if ( IsValid(Player))
+	// 	{
+	// 		ULOG(Warning, "ELEVATOR AUTO MOVE");
+	// 		this->SetMoveState(true);
+	// 		break;
+	// 	}
+	// }
 }
 
 void AElevator::FindWall()
