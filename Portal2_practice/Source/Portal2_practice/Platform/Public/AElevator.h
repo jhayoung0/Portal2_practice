@@ -40,8 +40,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Elevator")
 	FORCEINLINE void SetMoveState( const bool InMoveState )
 	{
+		if( MoveState == InMoveState )
+			return;
+
 		this->MoveState = InMoveState;
 		this->SetWallCollision(MoveState);
+				
+		if ( InMoveState )
+			this->CloseDoor();
+		else
+			this->OpenDoor();
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Elevator")
@@ -57,12 +65,19 @@ public:
 		this->SetMoveState(MoveState);
 	}
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Cube")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Elevator")
 	void MoveDone();
 
 	UFUNCTION( BlueprintCallable, Category="Elevator")
 	void SetWallCollision(const bool State);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Elevator")
+	void OpenDoor();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Elevator")
+	void CloseDoor();
+
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	int32 Group;

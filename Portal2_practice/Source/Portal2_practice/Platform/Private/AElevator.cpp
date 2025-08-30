@@ -105,6 +105,16 @@ void AElevator::SetWallCollision(const bool State)
 	}
 }
 
+void AElevator::OpenDoor_Implementation()
+{
+	ULOG(Warning, "%s: 엘리베이터 문이 닫힙니다", *GetActorNameOrLabel());
+}
+
+void AElevator::CloseDoor_Implementation()
+{
+	ULOG(Warning, "%s: 엘리베이터 문이 닫힙니다", *GetActorNameOrLabel());
+}
+
 void AElevator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
