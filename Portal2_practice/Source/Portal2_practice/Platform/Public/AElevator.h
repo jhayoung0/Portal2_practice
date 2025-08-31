@@ -77,6 +77,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Elevator")
 	void CloseDoor();
 
+	UFUNCTION(BlueprintPure, Category="Elevator")
+	bool IsGameStart() const;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
@@ -91,13 +93,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	EElevatorMoveDirectionType MoveDirection = EElevatorMoveDirectionType::Start_To_End;
 
-private:
-	UPROPERTY(VisibleAnywhere, Category="Elevator")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	class AActor* StartPos;
 
-	UPROPERTY(VisibleAnywhere, Category="Elevator")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	class AActor* EndPos;
-
+	
+private:
 	UPROPERTY(VisibleAnywhere, Category="Elevator");
 	class TArray<UPrimitiveComponent*> WallArray;
 
