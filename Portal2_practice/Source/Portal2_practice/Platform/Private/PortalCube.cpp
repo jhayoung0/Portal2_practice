@@ -72,6 +72,12 @@ void APortalCube::StartDisolve_Implementation()
 		&APortalCube::UpdateDissolve,
 		0.02f,
 		true);
+
+	this->ActivateDisolve();
+}
+
+void APortalCube::ActivateDisolve_Implementation()
+{
 }
 
 void APortalCube::UpdateDissolve()
@@ -98,4 +104,14 @@ void APortalCube::UpdateDissolve()
 		if (PoolManager != nullptr )
 			PoolManager->ReturnActorToPool(this);
 	}
+}
+
+
+// 큐브 포탈 이동
+void APortalCube::Activate_Duplicate(USceneComponent* EntryDoorComponent, USceneComponent* ExitDoorComponent)
+{
+}
+
+void APortalCube::Deactivate_Duplicate()
+{
 }

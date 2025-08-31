@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/TimelineComponent.h"
 #include "FirstPersonCharacter.generated.h"
+
+class APortalActor;
 
 UCLASS()
 class PORTAL2_PRACTICE_API AFirstPersonCharacter : public ACharacter
@@ -27,8 +30,130 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-	// 변수 선언
+
+	// 플레이어에 붙일 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UWeaponComponent* WeaponCP; 
+	class UCameraComponent* FirstPersonCamera;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* FirstPersonMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UArrowComponent* ArrowComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
+	TSubclassOf<class UWeaponComponent> WeaponCPClass;  // 설계도(클래스) 선택
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	class UWeaponComponent* WeaponCP = nullptr;         // 실제 인스턴스
+
+
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
+	bool HasRifle;    
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	bool NewlyCreatedPortal1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	bool NewlyCreatedPortal2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<APortalActor> Portal1Class;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<APortalActor> Portal2Class;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector PortalLoc;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector PortalForwardVector;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FRotator PortalRot;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal1Location;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal1ForwardVector;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FRotator Portal1Rotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal2Location;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FVector Portal2ForwardVector;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Portal")
+	FRotator Portal2Rotation;
+
+	
+	UPROPERTY(EditAnywhere, Category="Sound")
+	USoundBase* bulletsound;
+	
+	UPROPERTY(EditAnywhere, Category = "Anim")
+	UAnimMontage* Pistol_fire_montage;
+	
+
+
+	// 머티리얼 변수
+	// BP에서 원하는 머티리얼(asset) 직접 지정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
+	TObjectPtr<UMaterialInterface> Bluecore = nullptr;
+
+	// GC로 안 날아가게 MID는 UPROPERTY로 보관
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> Bluecore_DynMat = nullptr;
+
+
+	// BP에서 원하는 머티리얼(asset) 직접 지정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Material")
+	TObjectPtr<UMaterialInterface> Orangecore = nullptr;
+
+	// GC로 안 날아가게 MID는 UPROPERTY로 보관
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> Orangecore_DynMat = nullptr;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APortalActor* PortalActor;
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    class UInputMappingContext* IMC_Shoot; 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputMappingContext* IMC_MouseLook;
+	
+	// function
+	// 포탈 scale 설정을 위한 timeline 설정
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnScaleUpdate(APortalActor* TargetPortal);
+	
+	
+	UFUNCTION(BlueprintCallable, Category="Portal")
+	void SpawnPortal(TSubclassOf<APortalActor> PortalClass, bool color); // , FVector PortalLoc, FVector PortalForwardVector, FRotator PortalRot);
+	
+
+	UFUNCTION(BlueprintCallable, Category="Portal")
+	void SetPortalLocAndRot(float forward_float, float comparison_value
+		,FRotator PortalRotation, FRotator Rot, FVector PortalLocation, FVector Offset);
+
+
+	
+	UFUNCTION(BlueprintCallable, Category="Portal")
+	void DestroyPortal(TSubclassOf<APortalActor> Portal);
+	 
+	
 	
 };
