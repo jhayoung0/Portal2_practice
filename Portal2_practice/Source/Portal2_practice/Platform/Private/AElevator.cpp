@@ -29,7 +29,7 @@ void AElevator::BeginPlay()
 	Super::BeginPlay();
 
 	ElevatorCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, ELEVATOR_COLLISION_PATH);
-
+	
 	this->FindWall();
 	this->FindStartEndPos();
 

@@ -9,16 +9,21 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "Shared/FComponentHelper.h"
+
+#define STARTGAME_CUE			TEXT("/Game/CustomContents/Platfrom/Sound/Cue/StartGame_Cue.StartGame_Cue")
 
 ALevel01::ALevel01()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	StartGameSound =  FComponentHelper::LoadAsset<USoundBase>(STARTGAME_CUE);
 }
 
 void ALevel01::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	this->InitLevel();
 }
 

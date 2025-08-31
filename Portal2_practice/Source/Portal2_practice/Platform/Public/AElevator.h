@@ -9,8 +9,8 @@
 UENUM(BlueprintType)
 enum class EElevatorMoveDirectionType : uint8
 {
-	Start_To_End           UMETA(DisplayName="Start To End"),
-	End_To_Start				UMETA(DisplayName="End To Start")
+	Start_To_End        UMETA(DisplayName="Start To End"),
+	End_To_Start		UMETA(DisplayName="End To Start")
 };
 
 
@@ -53,7 +53,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Elevator")
-	FORCEINLINE bool IsSameGroup(int32 InGroup) const
+	FORCEINLINE bool IsSameGroup(const int32 InGroup) const
 	{
 		return Group == InGroup;
 	}
