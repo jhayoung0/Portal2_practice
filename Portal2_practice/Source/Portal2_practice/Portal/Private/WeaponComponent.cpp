@@ -17,6 +17,7 @@
 #include "TimerManager.h"
 #include "PortalCube.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Features/UCommonFunctionLibrary.h"
 
 
 UWeaponComponent::UWeaponComponent()
@@ -215,6 +216,9 @@ void UWeaponComponent::FlyBullet(FVector start, bool color, FVector EndImpactPoi
 
 	bullet->SetLifeSpan(0.22f);
 
+
+	if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		UCommonFunctionLibrary::PlayLocationSound(Player, ShootSound, 0.05f);
 }
 
 

@@ -76,7 +76,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem*  VFX_Orange;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound");
+	class USoundBase* ShootSound;
+
 
 	bool bInputBound = false;
 	
