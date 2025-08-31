@@ -9,8 +9,8 @@
 UENUM(BlueprintType)
 enum class EElevatorMoveDirectionType : uint8
 {
-	Start_To_End           UMETA(DisplayName="Start To End"),
-	End_To_Start				UMETA(DisplayName="End To Start")
+	Start_To_End        UMETA(DisplayName="Start To End"),
+	End_To_Start		UMETA(DisplayName="End To Start")
 };
 
 
@@ -53,7 +53,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Elevator")
-	FORCEINLINE bool IsSameGroup(int32 InGroup) const
+	FORCEINLINE bool IsSameGroup(const int32 InGroup) const
 	{
 		return Group == InGroup;
 	}
@@ -77,6 +77,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Elevator")
 	void CloseDoor();
 
+	UFUNCTION(BlueprintPure, Category="Elevator")
+	bool IsGameStart() const;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
@@ -91,13 +93,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	EElevatorMoveDirectionType MoveDirection = EElevatorMoveDirectionType::Start_To_End;
 
-private:
-	UPROPERTY(VisibleAnywhere, Category="Elevator")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	class AActor* StartPos;
 
-	UPROPERTY(VisibleAnywhere, Category="Elevator")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Elevator")
 	class AActor* EndPos;
-
+	
+private:
 	UPROPERTY(VisibleAnywhere, Category="Elevator");
 	class TArray<UPrimitiveComponent*> WallArray;
 

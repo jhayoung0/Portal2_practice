@@ -22,3 +22,8 @@ void UPortalEventManager::SendDoor(const int& InGroup, bool InState)
 {
 	OnDoor.Broadcast(InGroup, InState);
 }
+
+void UPortalEventManager::SendWheatney(const FString& InMsg)
+{
+	OnWheatney.Broadcast(InMsg);
+}

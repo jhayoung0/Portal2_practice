@@ -40,10 +40,9 @@ public:
 		return Group == InGroup;
 	}
 
-private:
-	UPROPERTY(EditAnywhere, Category="Partrol")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Partrol")
 	int32 Group;
 
-	UPROPERTY(EditAnywhere, Category="Partrol")
+	UPROPERTY(EditAnywhere,  BlueprintReadWrite, Category="Partrol")
 	EPatrolPointType PointType;
 };

@@ -44,4 +44,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Events")
 	void SendDoor(const int& InGroup, bool InState);
+
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWheatney, FString, Msg);
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnWheatney OnWheatney;
+	
+	UFUNCTION(BlueprintCallable, Category="Events")
+	void SendWheatney(const FString& InMsg);
 };

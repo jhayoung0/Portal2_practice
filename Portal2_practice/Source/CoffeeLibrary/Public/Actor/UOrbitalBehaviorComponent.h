@@ -6,15 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "UOrbitalBehaviorComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EOrbitalState : uint8
-{
-	PlayerFollow UMETA(DisplayName="Player Follow"),
-	TargetFloat  UMETA(DisplayName="Target Float"),
-	AscendAway   UMETA(DisplayName="Ascend & Vanish"),
-};
-
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COFFEELIBRARY_API UOrbitalBehaviorComponent : public UActorComponent
 {
@@ -23,54 +14,67 @@ class COFFEELIBRARY_API UOrbitalBehaviorComponent : public UActorComponent
 public:
 	UOrbitalBehaviorComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="State")
-	EOrbitalState State = EOrbitalState::PlayerFollow;
+	/** 타겟 중심(앵커) 보간 속도. 0이면 즉시 스냅 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Follow", meta=(ClampMin="0.0"))
+	float AnchorLerpSpeed = 3.f;
 
-	// 상태1
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Follow")
+	/** 등속 추적 사용 시 켜기. 켜면 LerpSpeed 대신 UnitsPerSec가 적용됨 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Follow")
+	bool bUseConstantFollow = false;
+
+	/** 등속 추적 속도(cm/s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Follow", meta=(EditCondition="bUseConstantFollow", ClampMin="0.0"))
+	float AnchorFollowUnitsPerSec = 800.f;
+
+	/** 공전 기준 타겟(중심점) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Targets")
+	AActor* TargetActor = nullptr;
+
+	/** 바라볼 대상(없으면 회전 고정) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Targets")
 	AActor* PlayerActor = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Follow")
-	float OrbitRadius = 300.f;
+	/** 공전 반경 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Orbit", meta=(ClampMin="0.0"))
+	float OrbitRadius = 200.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Follow")
-	float OrbitSpeedDegPerSec = 60.f;
+	/** 타겟 중심에서의 높이 오프셋 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Orbit")
+	float HeightOffset = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Follow")
-	float HeightOffset = 50.f;
+	/** 공전 각속도(도/초) — 궤도 회전에 사용 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Orbit")
+	float IdleYawSpeedDegPerSec = 90.f;
 
-	// 상태2
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float")
-	AActor* TargetActor = nullptr; // 지정 위치 대신 액터/컴포넌트로 앵커
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float")
+	/** 상하 바운스 진폭 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Vertical")
 	float BobAmplitude = 30.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float")
+
+	/** 상하 바운스 빈도(Hz) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Vertical", meta=(ClampMin="0.0"))
 	float BobSpeed = 1.2f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float")
-	float IdleYawSpeedDegPerSec = 30.f;
 
-	// 상태3
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ascend")
-	float AscendSpeed = 600.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ascend")
-	float AscendDistance = 2000.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ascend")
-	bool  bDestroyOnVanish = false; // 아니면 Hidden 처리
+	/** 위치 이동 시 충돌 스윕 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Movement")
+	bool bSweepMovement = false;
 
-	UFUNCTION(BlueprintCallable, Category="State")
-	void SetState(EOrbitalState NewState);
+	/** PlayerActor가 유효할 때만 바라봄 (Yaw만 적용) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Target Float|Rotation")
+	bool bFacePlayer = true;
+
+	/** 타겟 교체 API */
+	UFUNCTION(BlueprintCallable, Category="Target Float|Follow")
+	void SetTargetActor(AActor* NewTarget, bool bSnapAnchor = false, bool bPreserveOrbitPhase = true);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	float AngleDeg = 0.f;
-	float TimeAcc  = 0.f;
+	// 내부 상태
+	float   AngleDeg  = 0.f;
+	float   TimeAcc   = 0.f;
 	FVector AnchorLoc = FVector::ZeroVector;
-	float   AscendTravel = 0.f;
 
-	void Tick_PlayerFollow(float DeltaTime);
 	void Tick_TargetFloat(float DeltaTime);
-	void Tick_AscendAway(float DeltaTime);
 };

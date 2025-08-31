@@ -1,6 +1,8 @@
 ﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "AElevator.h"
+
+#include "ALevel01.h"
 #include "APatrolPoint.h"
 #include "FirstPersonCharacter.h"
 #include "ULog.h"
@@ -27,7 +29,7 @@ void AElevator::BeginPlay()
 	Super::BeginPlay();
 
 	ElevatorCollision = FComponentHelper::FindComponentByNameRecursive<UPrimitiveComponent>(this, ELEVATOR_COLLISION_PATH);
-
+	
 	this->FindWall();
 	this->FindStartEndPos();
 
@@ -103,6 +105,19 @@ void AElevator::SetWallCollision(const bool State)
 	{
 		Wall->SetCollisionEnabled(State ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 	}
+}
+
+bool AElevator::IsGameStart() const
+{
+	if (AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ALevel01::StaticClass()))
+	{
+		if (ALevel01* LevelScript = Cast<ALevel01>(Actor))
+		{
+			return LevelScript->IsGameStart;
+		}
+	}
+
+	return false;
 }
 
 void AElevator::OpenDoor_Implementation()
