@@ -61,30 +61,30 @@ void ALevel01::StartGame()
 				if ( Elevator->IsSameGroup(StartElevatorGroup) )
 					Elevator->SetMoveState(true);
 
-				if ( Elevator->IsSameGroup(1) )
-				{
-					auto Position = Elevator->GetActorLocation();
-					Elevator->SetActorLocation( FVector(Position.X, Position.Y, 605.0f));
-				}
+				// if ( Elevator->IsSameGroup(1) )
+				// {
+				// 	auto Position = Elevator->GetActorLocation();
+				// 	Elevator->SetActorLocation( FVector(Position.X, Position.Y, 605.0f));
+				// }
 			}
 		}
 	}
 
-	{
-		TArray<AActor*> FoundActor2;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPoint::StaticClass(), FoundActor2);
-		for (const auto& Actor : FoundActor2)
-		{
-			if (const auto& Point = Cast<APatrolPoint>(Actor))
-			{
-				if ( Point->IsSameGroup(1) &&  Point->IsStartType())
-				{
-					auto Position = Point->GetActorLocation();
-					Point->SetActorLocation( FVector(Position.X, Position.Y, 605.0f));
-				}
-			}
-		}
-	}
+	// {
+	// 	TArray<AActor*> FoundActor2;
+	// 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPoint::StaticClass(), FoundActor2);
+	// 	for (const auto& Actor : FoundActor2)
+	// 	{
+	// 		if (const auto& Point = Cast<APatrolPoint>(Actor))
+	// 		{
+	// 			if ( Point->IsSameGroup(1) &&  Point->IsStartType())
+	// 			{
+	// 				auto Position = Point->GetActorLocation();
+	// 				Point->SetActorLocation( FVector(Position.X, Position.Y, 605.0f));
+	// 			}
+	// 		}
+	// 	}
+	// }
 	
 	if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 		UCommonFunctionLibrary::PlayLocationSound(Player, StartGameSound, 0.05f);
